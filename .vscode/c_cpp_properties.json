@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "name": "STM32F407",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [ "USE_HAL_DRIVER", "STM32F407xx" ],
+            "cStandard": "c11",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "gcc-arm",
+            // use path: ${workspaceFolder}/result/compile_commands.json for nix
+            // use path: ${workspaceFolder}/build/compile_commands.json with makefile
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
+        }
+    ],
+    "version": 4
+}

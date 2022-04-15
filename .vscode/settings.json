@@ -1,0 +1,7 @@
+{
+    // Change path to your system, use `which` to find the location of the executables
+    // Somehow, cortex-debug wants absolute path, even if the package is present in $PATH
+    "cortex-debug.armToolchainPath": "/nix/store/6h6y6d1y8ryc56b2rsh07dq87qsym42a-gcc-arm-embedded-10.3.1/bin",
+    "cortex-debug.JLinkGDBServerPath": "/nix/store/qi5nij6wwmr1zzbfjjmwsk96d1nlna9p-segger-jlink/bin/JLinkGDBServerCLExe",
+    "nixEnvSelector.nixFile": "${workspaceRoot}/flake.nix"
+}

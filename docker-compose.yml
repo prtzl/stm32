@@ -1,0 +1,33 @@
+version: '3'
+services:
+
+    container:
+        build:
+            context: .
+            dockerfile: ./Dockerfile
+        image: fedora-arm-embedded-dev
+        container_name: fedora-arm-embedded-dev
+        volumes:
+            - ${PWD}/:/workdir
+        working_dir: /workdir
+        hostname: fedora-arm-embedded-dev
+
+    stmbuild:
+        extends:
+            service: container
+        command: bash -lc 'make -j8'
+
+    stmrebuild:
+        extends:
+            service: container
+        command: bash -lc 'make clean && make -j8'
+
+    stmclean:
+        extends:
+            service: container
+        command: bash -lc 'make clean'
+
+    shell:
+        extends:
+            service: container
+        command: bash -l

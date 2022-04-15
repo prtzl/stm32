@@ -1,0 +1,31 @@
+/*
+
+# GIT
+!.gitignore
+!README.md
+
+# NIX
+!*.nix
+!.envrc
+
+# TOOLS
+!Makefile
+!CMakeLists.txt
+!gcc-arm-none-eabi.cmake
+!.clang-format
+!Dockerfile
+!docker-compose.yml
+!.dockerignore
+
+# EXAMPLE
+!Core
+!Drivers
+!CubeMX
+!Project
+!STM32-project-template.ioc
+!/.vscode
+/.vscode/*
+!/.vscode/tasks.json
+!/.vscode/c_cpp_properties.json
+!/.vscode/launch.json
+!/.vscode/settings.json
