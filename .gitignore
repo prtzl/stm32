@@ -2,7 +2,10 @@
 
 # GIT
 !.gitignore
+
+# Guides
 !README.md
+!/docs
 
 # NIX
 !*.nix
