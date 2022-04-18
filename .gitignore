@@ -10,6 +10,7 @@
 # NIX
 !*.nix
 !.envrc
+!flake.lock
 
 # TOOLS
 !Makefile
