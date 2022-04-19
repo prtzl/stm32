@@ -53,10 +53,13 @@ CONTAINER_FILE := Dockerfile
 IMAGE_NAME := fedora-arm-embedded-dev
 CONTAINER_NAME := fedora-arm-embedded-dev
 
+ifeq ($(PLATFORM),Windows_NT)
+	WIN_PREFIX = winpty
+endif
 NEED_IMAGE = $(shell $(CONTAINER_TOOL) image inspect ${IMAGE_NAME} 2> /dev/null > /dev/null || echo image)
-NEED_CONTAINER = $(shell $(CONTAINER_TOOL) container inspect ${CONTAINER_NAME} 2> /dev/null > /dev/null || echo container)
+# usefull if you have a always running container in the background: NEED_CONTAINER = $(shell $(CONTAINER_TOOL) container inspect ${CONTAINER_NAME} 2> /dev/null > /dev/null || echo container)
 PODMAN_ARG = $(if $(filter $(CONTAINER_TOOL), podman),--userns=keep-id,)
-CONTAINER_RUN = $(CONTAINER_TOOL) run \
+CONTAINER_RUN = $(WIN_PREFIX) $(CONTAINER_TOOL) run \
 				--name ${CONTAINER_NAME} \
 				--rm \
 				-it \
@@ -70,10 +73,10 @@ CONTAINER_RUN = $(CONTAINER_TOOL) run \
 build-container: ${NEED_IMAGE}
 	${CONTAINER_RUN} bash -lc 'make -j$(shell nproc)'
 
-format-container: ${NEED_CONTAINER}
+format-container:
 	${CONTAINER_RUN} bash -lc 'make format -j$(shell nproc)'
 
-shell: ${NEED_CONTAINER}
+shell:
 	${CONTAINER_RUN} bash -l
 
 image: ${CONTAINER_FILE}
