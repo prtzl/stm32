@@ -29,7 +29,6 @@ You can do it by hand: `clang-format -i <path to source file>`
 
 Or with a shell script:  
 
-
 ```shell
 for file in $(find . -name '*.[ch]' -or -name '*.[ch]pp'); do clang-format -i $file; done
 ```
@@ -38,3 +37,7 @@ Or with provided makefile:
 
 `make format`: formats all source files in root using host computer.  
 `make format-container`: formats all source files in root using container.  
+
+## Extra tool tips
+
+I have provided a [document](docs/tools.md), where I write about tools and commands that you can use to aid your development.  
