@@ -1576,18 +1576,20 @@ __STATIC_FORCEINLINE uint32_t __USADA8(uint32_t op1, uint32_t op2, uint32_t op3)
 }
 
 #define __SSAT16(ARG1, ARG2)                                                                  \
-    ({                                                                                        \
-        int32_t __RES, __ARG1 = (ARG1);                                                       \
-        __ASM("ssat16 %0, %1, %2" : "=r"(__RES) : "I"(ARG2), "r"(__ARG1));                    \
-        __RES;                                                                                \
-    })
+    (                                                                                         \
+        {                                                                                     \
+            int32_t __RES, __ARG1 = (ARG1);                                                   \
+            __ASM("ssat16 %0, %1, %2" : "=r"(__RES) : "I"(ARG2), "r"(__ARG1));                \
+            __RES;                                                                            \
+        })
 
 #define __USAT16(ARG1, ARG2)                                                                  \
-    ({                                                                                        \
-        uint32_t __RES, __ARG1 = (ARG1);                                                      \
-        __ASM("usat16 %0, %1, %2" : "=r"(__RES) : "I"(ARG2), "r"(__ARG1));                    \
-        __RES;                                                                                \
-    })
+    (                                                                                         \
+        {                                                                                     \
+            uint32_t __RES, __ARG1 = (ARG1);                                                  \
+            __ASM("usat16 %0, %1, %2" : "=r"(__RES) : "I"(ARG2), "r"(__ARG1));                \
+            __RES;                                                                            \
+        })
 
 __STATIC_FORCEINLINE uint32_t __UXTB16(uint32_t op1)
 {
@@ -1799,25 +1801,27 @@ __STATIC_FORCEINLINE int32_t __QSUB(int32_t op1, int32_t op2)
 
 #if 0
 #define __PKHBT(ARG1, ARG2, ARG3)                                                             \
-    ({                                                                                        \
-        uint32_t __RES, __ARG1 = (ARG1), __ARG2 = (ARG2);                                     \
-        __ASM("pkhbt %0, %1, %2, lsl %3"                                                      \
-              : "=r"(__RES)                                                                   \
-              : "r"(__ARG1), "r"(__ARG2), "I"(ARG3));                                         \
-        __RES;                                                                                \
-    })
-
-#define __PKHTB(ARG1, ARG2, ARG3)                                                             \
-    ({                                                                                        \
-        uint32_t __RES, __ARG1 = (ARG1), __ARG2 = (ARG2);                                     \
-        if (ARG3 == 0)                                                                        \
-            __ASM("pkhtb %0, %1, %2" : "=r"(__RES) : "r"(__ARG1), "r"(__ARG2));               \
-        else                                                                                  \
-            __ASM("pkhtb %0, %1, %2, asr %3"                                                  \
+    (                                                                                         \
+        {                                                                                     \
+            uint32_t __RES, __ARG1 = (ARG1), __ARG2 = (ARG2);                                 \
+            __ASM("pkhbt %0, %1, %2, lsl %3"                                                  \
                   : "=r"(__RES)                                                               \
                   : "r"(__ARG1), "r"(__ARG2), "I"(ARG3));                                     \
-        __RES;                                                                                \
-    })
+            __RES;                                                                            \
+        })
+
+#define __PKHTB(ARG1, ARG2, ARG3)                                                             \
+    (                                                                                         \
+        {                                                                                     \
+            uint32_t __RES, __ARG1 = (ARG1), __ARG2 = (ARG2);                                 \
+            if (ARG3 == 0)                                                                    \
+                __ASM("pkhtb %0, %1, %2" : "=r"(__RES) : "r"(__ARG1), "r"(__ARG2));           \
+            else                                                                              \
+                __ASM("pkhtb %0, %1, %2, asr %3"                                              \
+                      : "=r"(__RES)                                                           \
+                      : "r"(__ARG1), "r"(__ARG2), "I"(ARG3));                                 \
+            __RES;                                                                            \
+        })
 #endif
 
 #define __PKHBT(ARG1, ARG2, ARG3)                                                             \
