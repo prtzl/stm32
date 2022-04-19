@@ -37,7 +37,7 @@ void SWO_PrintString(char const* s, uint8_t const portNumber)
     }
 }
 
-void SWO_Print(char const* str)
+void SWO_PrintDefault(char const* str)
 {
     SWO_PrintString(str, 0);
 }
