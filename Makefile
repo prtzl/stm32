@@ -1,6 +1,7 @@
 .PHONY: all build build-container cmake format format-container shell image build-container clean clean-image clean-all
 ############################### Native Makefile ###############################
 
+PROJECT_NAME ?= firmware
 BUILD_DIR ?= build
 BUILD_TYPE ?= Debug
 PLATFORM = $(OS)
@@ -27,6 +28,7 @@ ${BUILD_DIR}/Makefile:
 	cmake \
 		-G "$(BUILD_SYSTEM)" \
 		-B${BUILD_DIR} \
+		-DPROJECT_NAME=$(PROJECT_NAME) \
 		-DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
 		-DCMAKE_TOOLCHAIN_FILE=gcc-arm-none-eabi.cmake \
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \

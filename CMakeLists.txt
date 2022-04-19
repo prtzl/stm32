@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.12)
 ###############################################################################
 # Set project name and source code folder location
-project(sample-f407vg)
+project(${PROJECT_NAME})
 set(PROJECT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Project)
 
 option(DUMP_ASM "Create full assembly of final executable" OFF)

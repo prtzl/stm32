@@ -6,7 +6,7 @@
 }:
 
 stdenv.mkDerivation rec {
-    name = "sample-f407vg";
+    name = "firmware";
     src = ./.;
 
     nativeBuildInputs = [ cmake gnumake gcc-arm-embedded ];
