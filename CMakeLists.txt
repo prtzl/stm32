@@ -2,9 +2,14 @@
 cmake_minimum_required(VERSION 3.12)
 ###############################################################################
 # Set project name and source code folder location
+
 project(${PROJECT_NAME})
 set(PROJECT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Project)
 
+if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
+    set(CMAKE_BUILD_TYPE Debug)
+endif()
+message("Build type: ${CMAKE_BUILD_TYPE}")
 option(DUMP_ASM "Create full assembly of final executable" OFF)
 
 # Set microcontroller information
@@ -105,3 +110,4 @@ if (${DUMP_ASM})
     add_custom_command(TARGET ${EXECUTABLE} POST_BUILD
         COMMAND ${CMAKE_OBJDUMP} -D $<TARGET_FILE:${EXECUTABLE}> > ${EXECUTABLE}.s)
 endif()
+
