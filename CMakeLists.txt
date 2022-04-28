@@ -65,7 +65,7 @@ target_include_directories(${EXECUTABLE} PRIVATE
     ${PROJECT_INCLUDE_DIRECTORIES})
 ###############################################################################
 target_compile_options(${EXECUTABLE} PRIVATE
-${CPU_PARAMETERS}
+    ${CPU_PARAMETERS}
     -Wall
     -Wextra
     -Wpedantic
@@ -88,7 +88,6 @@ target_link_options(${EXECUTABLE} PRIVATE
     -T${MCU_LINKER_SCRIPT}
     ${CPU_PARAMETERS}
     -Wl,-Map=${CMAKE_PROJECT_NAME}.map
-    --specs=nosys.specs
     -Wl,--start-group
     -lc
     -lm
