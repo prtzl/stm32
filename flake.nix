@@ -31,9 +31,9 @@
         };
     in {
         inherit firmware flash;
-        defaultPackage.${system} = firmware;
+        packages.${system}.default = firmware;
 
-        devShell.${system} = pkgs.mkShell {
+        devShells.${system}.default = pkgs.mkShell {
             nativeBuildInputs = (firmware.nativeBuildInputs or []) ++ [ pkgs.clang-tools jlink ];
             LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [ pkgs.llvmPackages_11.llvm ];
         };
