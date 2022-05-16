@@ -81,7 +81,7 @@ target_compile_options(${EXECUTABLE} PRIVATE
     -fno-common
     -Wno-unused-parameter
     $<$<COMPILE_LANGUAGE:CXX>:
-        -Wconversion # STM libraries!
+        -Wconversion
         -Wno-volatile
         -Wold-style-cast
         -Wuseless-cast
