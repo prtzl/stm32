@@ -41,3 +41,7 @@ Or with provided makefile:
 ## Extra tool tips
 
 I have provided a [document](docs/tools.md), where I write about tools and commands that you can use to aid your development.  
+
+## Extra code tips
+
+I have provided a [document](docs/code-tips.md), where I write about useful options for writing and debugging code. 
