@@ -25,7 +25,7 @@ Install docker or podman (linux only). Docker desktop will also install some too
 
 ## With Makefile
 
-You can use the same [Makefile](Makefile) to build container image and your project, which requires you to also install `make`. The following targets are available:  
+You can use the same [Makefile](../Makefile) to build container image and your project, which requires you to also install `make`. The following targets are available:  
 
 `make build-container`: (build) the container image, run container to build project using container.  
 `make image`: (re)build the container image.  
