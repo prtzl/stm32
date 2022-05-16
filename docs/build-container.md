@@ -5,13 +5,13 @@ For reproducible development environment use the provided [container](Dockerfile
 ---
 Pros:  
 
-* Minimal dependencies, only container tool and possibly `make` or `-compose`.  
-* Low file system pollution.
+* Minimal dependencies, only container tool and possibly `make` or `<docker/podman>-compose`.  
+* Low host system pollution.
 * Cross platform and cross distribution (except with podman).  
 
 Cons:  
 
-* Since all dependencies and tools are installed in the container, IDEs will not be able to find the libraries.  
+* Since all dependencies and tools are installed in the container, IDEs will not be able to find the system libraries.  
 
 Verdict:  
 
@@ -103,5 +103,4 @@ winpty docker run --rm -it -v "/$(pwd -W):/workdir" -w//workdir fedora-arm-embed
 
 If you're using `podman`, then you also have to provide a few more arguments to  **run** commands: `--userns=keep-id --security-opt label=disable`.  
 
-**NOTE:** building in container with makefile on Windows 10 is currently not working, use [docker-compose](#with-compose).  
 Tested with docker (`20.10.9`), podman (`3.4.3`), docker-compose (`1.29.2`) on Fedora 35.  
