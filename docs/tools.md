@@ -72,9 +72,9 @@ Options:
 
 * `-h`: display ELF file header (file information)  
 * `-S`: display sections (a bit nicer than `objdump -h`, but missing some information)  
-* `-s`: display all symbols (functions)
+* `-s`: display all symbols (functions, global variables)
 * `-C`: demangle symbol names (C++), used with `-s`
-* `-x <section name>`: hexdumps the section contents
+* `-x <section name>`: hexdumps the section contents (4 groups of 4 byte strings per line)
 * `-p <section name>`: stringdumps the section contents
 
 ### Examples
@@ -119,4 +119,4 @@ It doesn't do much, therefore it doesn't have as many options, so I use it mainl
 hexdump -C <file.bin>
 ```
 
-This command will display output in hex as well as ascii (similar to objdump with `-x`).  
+This command will display output in hex (two characted per byte, 16 bytes per line) as well as ascii (similar to objdump with `-x`).  
