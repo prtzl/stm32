@@ -1,6 +1,6 @@
 # Building STM32 project with Container
 
-For reproducible development environment use the provided [container](Dockerfile). It installs the latest gcc-arm-embedded toolchain from ARMs website which guarantees the same version every time. Other (less version critical) packages are installed via distribution package manager. Appropriate distribution is chosen, which holds packages with at least minimum required version in the repositories.  
+For reproducible development environment use the provided [container](../Dockerfile). It installs the latest gcc-arm-embedded toolchain from ARMs website which guarantees the same version every time. Other (less version critical) packages are installed via distribution package manager. Appropriate distribution is chosen, which holds packages with at least minimum required version in the repositories.  
 
 ---
 Pros:  

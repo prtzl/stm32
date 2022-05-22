@@ -16,7 +16,7 @@ You can also install `direnv` to your shell along with `nix-direnv` and run `dir
 
 To build the project, run `nix build`. If successful, the resulting `.bin`, `.elf` and `.s` files will be placed into symlink directory `result`. *Not 100% sure: As long as this link is in the project, nix garbage collector will not remove the project derivation, which can be problematic if you have a slower connection or you are offline.*  
 
-In development mode use the provided [Makefile](Makefile) as described in [native development](#native), which generates build files along with `compile_commands.json` in `build` folder. You can use this in your IDE of choice. You can also use nix to generate those files, but make sure, that your IDE was launched from the development shell or, in case of vscode, you have nix plugins installed.  
+In development mode use the provided [Makefile](../Makefile) as described in [native development](build-native.md), which generates build files along with `compile_commands.json` in `build` folder. You can use this in your IDE of choice. You can also use nix to generate those files, but make sure, that your IDE was launched from the development shell or, in case of vscode, you have nix plugins installed.  
 
 ---
 
@@ -24,7 +24,7 @@ Pros:
 
 * Dependencies are not installed system-wide and do not pollute your file system.  
 * Project dependencies version is fixed with lock file and only updates on users request.  
-* You can still use the provided [Makefile](Makefile) as with [native development](#native) as the shell loads all the dependencies.  
+* You can still use the provided [Makefile](../Makefile) as with [native development](build-native.md) as the shell loads all the dependencies.  
 * For the above reason, you can also use your favorite IDE.  
 
 Cons:  

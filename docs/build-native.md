@@ -16,7 +16,7 @@ You can download arm-none-eabi toolchain from [website](https://developer.arm.co
 
 **NOTE**. If your cmake fails to "compile a simple test program" while running the example, then you might not have `newlib` installed (one of the errors I have encountered). Some distribution packages carry the package separately.
 
-For other methods refer to the [workflow](#workflow) chapters.  
+For other methods refer to the workflow chapters listed in [readme](../README.md).  
 
 ## Workflow
 
