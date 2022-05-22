@@ -20,7 +20,7 @@ For other methods refer to the [workflow](#workflow) chapters.
 
 ## Workflow
 
-All actions are executed with the first part of the provided [Makefile](Makefile).  
+All actions are executed with the first part of the provided [Makefile](../Makefile).  
 
 Following targets are available:  
 
