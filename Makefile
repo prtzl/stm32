@@ -1,8 +1,9 @@
-.PHONY: all build build-container cmake format format-container shell image build-container clean clean-image clean-all
+.PHONY: all build build-container cmake format flash-stlink flash-jlink format-container shell image build-container clean clean-image clean-all
 ############################### Native Makefile ###############################
 
 PROJECT_NAME ?= firmware
 BUILD_DIR ?= build
+FIRMWARE := $(BUILD_DIR)/$(PROJECT_NAME).bin
 BUILD_TYPE ?= Debug
 PLATFORM = $(OS)
 ifeq ($(PLATFORM),Windows_NT)
@@ -38,6 +39,23 @@ SRCS := $(shell find . -name '*.[ch]' -or -name '*.[ch]pp')
 format: $(addsuffix .format,$(SRCS))
 %.format: %
 	clang-format -i $<
+
+# Device specific!
+DEVICE ?= STM32F407VG
+
+flash-st: build
+	st-flash --reset write $(BUILD_DIR)/$(PROJECT_NAME).bin 0x08000000
+
+$(BUILD_DIR)/jlink-script:
+	touch $@
+	@echo device $(DEVICE) > $@
+	@echo si 1 >> $@
+	@echo speed 4000 >> $@
+	@echo loadfile $(FIRMWARE),0x08000000 >> $@
+	@echo -e "r\ng\nqc" >> $@
+
+flash-jlink: build | $(BUILD_DIR)/jlink-script
+	JLinkExe -commanderScript $(BUILD_DIR)/jlink-script
 
 clean:
 	rm -rf $(BUILD_DIR)
