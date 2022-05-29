@@ -6,6 +6,7 @@ BUILD_DIR ?= build
 FIRMWARE := $(BUILD_DIR)/$(PROJECT_NAME).bin
 BUILD_TYPE ?= Debug
 PLATFORM = $(OS)
+
 ifeq ($(PLATFORM),Windows_NT)
 	BUILD_SYSTEM ?= MinGW Makefiles
 else
@@ -62,24 +63,26 @@ clean:
 
 ################################## Container ##################################
 
+ifeq ($(PLATFORM),Windows_NT)
+	GROUP ?= $(shell id -un)
+	WIN_PREFIX = winpty
+	WORKDIR_PATH = "//workdir"
+	WORKDIR_VOLUME = "/$$(pwd -W):/workdir"
+else
+	GROUP ?= $(shell id -ug)
+	WORKDIR_PATH = /workdir
+	WORKDIR_VOLUME = "$$(pwd):/workdir"
+endif
+
 UID ?= $(shell id -u)
 GID ?= $(shell id -g)
 USER ?= $(shell id -un)
-GROUP ?= $(shell id -gn)
 
 CONTAINER_TOOL ?= docker
 CONTAINER_FILE := Dockerfile
 IMAGE_NAME := fedora-arm-embedded-dev
 CONTAINER_NAME := fedora-arm-embedded-dev
 
-ifeq ($(PLATFORM),Windows_NT)
-	WIN_PREFIX = winpty
-	WORKDIR_PATH = "//workdir"
-	WORKDIR_VOLUME = "/$$(pwd -W):/workdir"
-else
-	WORKDIR_PATH = /workdir
-	WORKDIR_VOLUME = "$$(pwd):/workdir"
-endif
 NEED_IMAGE = $(shell $(CONTAINER_TOOL) image inspect $(IMAGE_NAME) 2> /dev/null > /dev/null || echo image)
 # usefull if you have a always running container in the background: NEED_CONTAINER = $(shell $(CONTAINER_TOOL) container inspect $(CONTAINER_NAME) 2> /dev/null > /dev/null || echo container)
 PODMAN_ARG = $(if $(filter $(CONTAINER_TOOL), podman),--userns=keep-id,)

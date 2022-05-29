@@ -1,6 +1,6 @@
 # Building STM32 project with Container
 
-For reproducible development environment use the provided [container](../Dockerfile). It installs the latest gcc-arm-embedded toolchain from ARMs website which guarantees the same version every time. Other (less version critical) packages are installed via distribution package manager. Appropriate distribution is chosen, which holds packages with at least minimum required version in the repositories.  
+For reproducible development environment use the provided [container](../Dockerfile). It installs a specific (as the time of writing 10.3.0 is the latest) gcc-arm-embedded toolchain from ARMs website, which guarantees the same version every time. Other (less version critical) packages are installed via distribution package manager. Appropriate distribution is chosen, which holds packages with at least minimum required version in the repositories.  
 
 ---
 Pros:  
@@ -21,11 +21,11 @@ Verdict:
 
 ## Dependencies
 
-Install docker or podman (linux only). Docker desktop will also install some tools, like `docker-compose`. In next steps, you will also have an option to use some additional dependencies for certain workflows.
+Install `docker` or `podman` (linux only). Docker desktop will also install some tools, like `docker-compose`. You can also install `gnumake` if you want to use the same [Makefile](Makefile) for building and deploying the container.  
 
 ## With Makefile
 
-You can use the same [Makefile](../Makefile) to build container image and your project, which requires you to also install `make`. The following targets are available:  
+The following additional targets for container are available:  
 
 `make build-container`: (build) the container image, run container to build project using container.  
 `make image`: (re)build the container image.  
@@ -35,11 +35,11 @@ You can use the same [Makefile](../Makefile) to build container image and your p
 
 Default container manager is [docker](https://www.docker.com/). Everything is also compatible with [podman](https://podman.io/) as the syntax is mostly the same. You can read on the differences between the two [here](https://phoenixnap.com/kb/podman-vs-docker).  
 
-Run `<docker/podman> container prune` and enter `y` to remove any leftover containers.  
+Run `<docker/podman> container prune` and enter `y` to remove any leftover containers (incorrectly closed or removed).  
 
 ## With compose
 
-There is also a `docker-compose.yml`, which you can use if you don't have(want) `make` installed, but you will need `docker-compose`. Docker for windows already installs it.  
+There is also a `docker-compose.yml`, which you can use if you don't have(want) `gnumake` installed, but you will need `docker-compose`. Docker for windows already installs it.  
 
 First build the image:
 
@@ -58,7 +58,7 @@ There are several services for the `docker-compose`, which are analog to Makefil
 
 Run `docker-compose down` after you're done to remove containers.  
 
-**NOTE:** Syntax for `podman-compose` is similar to `docker-compose`, but as of now I'm having problems running the services the same way as with `docker-compose`.  
+**NOTE:** Syntax for `podman-compose` is similar to `docker-compose`, but as of now I'm having problems running the services with `podman-compose`. Looks like permissions thing.  
 
 ## With just the container
 

@@ -8,9 +8,9 @@ Nix has a steep learning curve, which I'm still in the middle of, but in the lon
 
 ## Dependencies
 
-Nix can be install on all unix platforms. For current flakes we'll need the most up-to date version on `unstable` channel.  
+Nix can be install on all unix platforms. Navigate the [website](https://nixos.org/download.html) for installation instructions. For current flakes we'll need the most up-to date version on `unstable` channel.  
 
-You can also install `direnv` to your shell along with `nix-direnv` and run `direnv allow` to automatically load the shell with installed dependencies. Otherwise call `nix develop`. This enables you to create a shell with all the packages, that are used to build you project, and more. This is very useful for development and debugging.  
+You can also install `direnv` to your shell along with `nix-direnv` and run `direnv allow` to automatically load the shell with installed dependencies. Otherwise call `nix develop`. This enables you to enter a shell with all the packages that are used to build you project and more. This is very useful for development and debugging without the need to install the packages on your computer globally.  
 
 ## Workflow
 

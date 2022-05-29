@@ -1,21 +1,21 @@
 # STM32 project template
 
 This repository holds all the possible tools and templates for building and developing STM32 projects.  
-Project is configured with CMake and can be built with multiple ways.  
+Firmware is configured with CMake and can be built in multiple ways.  
 
-I don't expect you to use all of the files found here or all the lines in the configuration files (Makefile, CMakeLists.txt, etc.), so make sure to remove all that you don't need for your project.  
+I don't expect you to use all of the files found here or all the lines in the configuration files (Makefile, CMakeLists.txt, etc.). Make sure to read them and remove what you don't need.  
 
-I will also try to make this repository as cross platform as possible.  
+I will also try to make this repository as cross platform as possible. Currently I've tested it on Windows 10 and Linux (Fedora 35, Nixos, Ubuntu 20.04). Any problems regarding a specific distribution will be mentioned in the [workflows](#workflow).  
 
 ## Example
 
-You can utilize everything in root of the repository. It holds an example project built around `STM32F407VG`.
+You can utilize everything in root of the repository. It holds an example project built around `STM32F407VG` on a discovery board. It blinks the onboard blue LED and prints "Hello, world" over SWO.  
 
 ## Workflow
 
-You have a few options to build your project. Pros and cons will be listed for each method in its guide.  
+There are a few options to build the CMake project. Approaches differ in dependency management and source control, which is important when you might work in a team or share your projects online. Pros and cons will be listed for each method in its guide. The following guides are available:  
 
-[First way](docs/build-native.md) is to use the provided [Makefile](Makefile) for native development on your computer, but you have to install the required dependencies on your computer, matching or exceeding the minimum required versions.  
+[First way](docs/build-native.md) is to use the provided [Makefile](Makefile) for native development on your computer, You have to install the required dependencies on your computer, matching or exceeding the minimum required versions.  
 
 [Second way](docs/build-container.md) is using a container tool like `docker` or `podman` with or without additional dependencies, like `docker-compose` or `make`.  
 
@@ -23,9 +23,9 @@ You have a few options to build your project. Pros and cons will be listed for e
 
 ## Code style
 
-Before committing code, format all source files. I have provided a set of rules for `clang-format`, which you can apply to all source files.  
+Before committing code, format all source files. I have provided a set of [rules](.clang-format) for `clang-format`, which you can apply to all source files.  
 
-You can do it by hand: `clang-format -i <path to source file>`  
+You can do it for a specific file: `clang-format -i <path to source file>`  
 
 Or with a shell script:  
 
@@ -35,8 +35,8 @@ for file in $(find . -name '*.[ch]' -or -name '*.[ch]pp'); do clang-format -i $f
 
 Or with provided makefile:
 
-`make format`: formats all source files in root using host computer.  
-`make format-container`: formats all source files in root using container.  
+`make format`: formats all source files in root using host installed clang-format.  
+`make format-container`: formats all source files in root using container installed clang-format.  
 
 ## Extra tool tips
 
@@ -44,4 +44,4 @@ I have provided a [document](docs/tools.md), where I write about tools and comma
 
 ## Extra code tips
 
-I have provided a [document](docs/code-tips.md), where I write about useful options for writing and debugging code. 
+I have provided a [document](docs/code-tips.md), where I write about useful options for writing and debugging code.  
