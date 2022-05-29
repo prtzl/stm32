@@ -1,6 +1,8 @@
 #include "main.h"
+#include <Project/SWO.h>
 #include <Project/projectMain.h>
 #include <array>
+#include <cstdio>
 #include <span>
 
 struct Led
@@ -43,6 +45,7 @@ void projectMain()
     while (true)
     {
         led.toggle();
-        HAL_Delay(500);
+        SWO_PrintDefault("Hello, world!, ");
+        HAL_Delay(1000);
     }
 }
