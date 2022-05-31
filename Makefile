@@ -5,18 +5,17 @@ PROJECT_NAME ?= firmware
 BUILD_DIR ?= build
 FIRMWARE := $(BUILD_DIR)/$(PROJECT_NAME).bin
 BUILD_TYPE ?= Debug
-PLATFORM = $(OS)
+PLATFORM = $(if $(OS),$(OS),$(shell uname -s))
 
 ifeq ($(PLATFORM),Windows_NT)
-	BUILD_SYSTEM ?= MinGW Makefiles
+    BUILD_SYSTEM ?= MinGW Makefiles
 else
-	UNAME := $(shell uname -s)
-	ifeq ($(UNAME),Linux)
-		BUILD_SYSTEM ?= Unix Makefiles
-	else
-		@echo "Unsuported platform"
-		exit 1
-	endif
+    ifeq ($(PLATFORM),Linux)
+        BUILD_SYSTEM ?= Unix Makefiles
+    else
+        @echo "Unsuported platform"
+        exit 1
+    endif
 endif
 
 all: build
@@ -63,20 +62,19 @@ clean:
 
 ################################## Container ##################################
 
-ifeq ($(PLATFORM),Windows_NT)
-	GROUP ?= $(shell id -un)
-	WIN_PREFIX = winpty
-	WORKDIR_PATH = "//workdir"
-	WORKDIR_VOLUME = "/$$(pwd -W):/workdir"
-else
-	GROUP ?= $(shell id -ug)
-	WORKDIR_PATH = /workdir
-	WORKDIR_VOLUME = "$$(pwd):/workdir"
-endif
-
 UID ?= $(shell id -u)
 GID ?= $(shell id -g)
 USER ?= $(shell id -un)
+GROUP ?= $(if $(filter $(PLATFORM), Windows_NT),$(shell id -un),$(shell id -gn))
+
+ifeq ($(PLATFORM),Windows_NT)
+    WIN_PREFIX = winpty
+    WORKDIR_PATH = "//workdir"
+    WORKDIR_VOLUME = "/$$(pwd -W):/workdir"
+else
+    WORKDIR_PATH = /workdir
+    WORKDIR_VOLUME = "$$(pwd):/workdir"
+endif
 
 CONTAINER_TOOL ?= docker
 CONTAINER_FILE := Dockerfile

@@ -11,12 +11,15 @@
       pkgs = nixpkgs.legacyPackages.${system};
       stdenv = pkgs.stdenv;
       jlink = jlink-pack.defaultPackage.${system};
+      
       firmware = pkgs.callPackage ./default.nix { };
+      
       flash-stlink = pkgs.writeShellApplication {
         name = "flash-stlink";
         text = "st-flash --reset write ${firmware}/bin/${firmware.name}.bin 0x08000000";
         runtimeInputs = [ stlink ];
       };
+      
       jlink-script = pkgs.writeTextFile {
         name = "jlink-script";
         text = ''
@@ -29,6 +32,7 @@
           qc
         '';
       };
+      
       flash-jlink = pkgs.writeShellApplication {
         name = "flash-jlink";
         text = "JLinkExe -commanderscript ${jlink-script}";
@@ -36,13 +40,13 @@
       };
     in {
       inherit firmware flash-jlink flash-stlink;
-      packages.${system}.default = firmware;
+      
+      defaultPackage.${system} = firmware;
 
-      devShells.${system}.default = pkgs.mkShell {
+      devShell.${system} = pkgs.mkShell {
         nativeBuildInputs = (firmware.nativeBuildInputs or [ ])
-          ++ [ pkgs.clang-tools jlink stlink ];
-        LD_LIBRARY_PATH =
-          pkgs.lib.makeLibraryPath [ pkgs.llvmPackages_11.llvm ];
+          ++ [ pkgs.clang-tools jlink pkgs.stlink ];
+        LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [ pkgs.llvmPackages_11.llvm ];
       };
     };
 }
