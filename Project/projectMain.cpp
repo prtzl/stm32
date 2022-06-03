@@ -45,7 +45,7 @@ void projectMain()
     while (true)
     {
         led.toggle();
-        SWO_PrintDefault("Hello, world!, ");
+        SWO_PrintDefault("Hello, world!\n");
         HAL_Delay(1000);
     }
 }
