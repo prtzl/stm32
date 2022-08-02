@@ -1,61 +1,33 @@
-/**
-  ******************************************************************************
-  * @file      startup_stm32f407xx.s
-  * @author    MCD Application Team
-  * @brief     STM32F407xx Devices vector table for GCC based toolchains. 
-  *            This module performs:
-  *                - Set the initial SP
-  *                - Set the initial PC == Reset_Handler,
-  *                - Set the vector table entries with the exceptions ISR address
-  *                - Branches to main in the C library (which eventually
-  *                  calls main()).
-  *            After Reset the Cortex-M4 processor is in Thread mode,
-  *            priority is Privileged, and the Stack is set to Main.
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under BSD 3-Clause license,
-  * the "License"; You may not use this file except in compliance with the
-  * License. You may obtain a copy of the License at:
-  *                        opensource.org/licenses/BSD-3-Clause
-  *
-  ******************************************************************************
-  */
-    
-  .syntax unified
+/* File fluff */
+  .syntax unified  
   .cpu cortex-m4
   .fpu softvfp
   .thumb
 
+/* Define global symbols */
 .global  g_pfnVectors
 .global  Default_Handler
 
-/* start address for the initialization values of the .data section. 
-defined in linker script */
-.word  _sidata
-/* start address for the .data section. defined in linker script */  
-.word  _sdata
-/* end address for the .data section. defined in linker script */
-.word  _edata
-/* start address for the .bss section. defined in linker script */
-.word  _sbss
-/* end address for the .bss section. defined in linker script */
-.word  _ebss
-/* stack used for SystemInit_ExtMemCtl; always internal RAM used */
+/* External defined symbols (linker script) */
+.word  _sidata  /* start address for the initialization values of the .data section */ 
+.word  _sdata   /* start address for the .data section. defined in linker script */  
+.word  _edata   /* end address for the .data section. defined in linker script */
+.word  _sbss    /* start address for the .bss section. defined in linker script */
+.word  _ebss    /* end address for the .bss section. defined in linker script */
 
-/**
- * @brief  This is the code that gets called when the processor first
- *          starts execution following a reset event. Only the absolutely
- *          necessary set is performed, after which the application
- *          supplied main() routine is called. 
- * @param  None
- * @retval : None
+/*
+  Reset handler
+   * function stored in .text
+   * implementation can be redifined
+
+  Starts by loading stack pointer from _estack.
+  Copies intialized data from FLASH to RAM for globals.
+  Sets uninitialized data in RAM to 0.
+  Calls SystemInit (application defined (ST)).
+  Calls global constructors.
+->Calls main()
 */
-
-    .section  .text.Reset_Handler
+  .section  .text.Reset_Handler
   .weak  Reset_Handler
   .type  Reset_Handler, %function
 Reset_Handler:  
@@ -95,36 +67,39 @@ LoopFillZerobss:
 /* Call the clock system intitialization function.*/
   bl  SystemInit   
 /* Call static constructors */
-    bl __libc_init_array
+  bl __libc_init_array
 /* Call the application's entry point.*/
   bl  main
   bx  lr    
-.size  Reset_Handler, .-Reset_Handler
+  .size  Reset_Handler, .-Reset_Handler
 
-/**
- * @brief  This is the code that gets called when the processor receives an 
- *         unexpected interrupt.  This simply enters an infinite loop, preserving
- *         the system state for examination by a debugger.
- * @param  None     
- * @retval None       
+/*
+  Default handler
+   * function stored in .text
+
+  Implementation is an infinite loop
 */
-    .section  .text.Default_Handler,"ax",%progbits
+  .section  .text.Default_Handler,"ax",%progbits
 Default_Handler:
 Infinite_Loop:
   b  Infinite_Loop
   .size  Default_Handler, .-Default_Handler
-/******************************************************************************
-*
-* The minimal vector table for a Cortex M3. Note that the proper constructs
-* must be placed on this to ensure that it ends up at physical address
-* 0x0000.0000.
-* 
-*******************************************************************************/
-   .section  .isr_vector,"a",%progbits
+
+/*
+  Vector table data section
+   * containes data defined with .word instruction
+*/
+.section  .isr_vector,"a",%progbits
   .type  g_pfnVectors, %object
   .size  g_pfnVectors, .-g_pfnVectors
     
-    
+/*
+  Vector table data - addresses
+   * starts with _estack - initial stack position (end of RAM)
+   * second is first function called on system reset (Reset_Handler)
+   * Next follow system interrupt handlers (ARM)
+   * Next follow MCU specific interrupt handlers
+*/
 g_pfnVectors:
   .word  _estack
   .word  Reset_Handler
@@ -505,4 +480,3 @@ g_pfnVectors:
    .weak      FPU_IRQHandler                  
    .thumb_set FPU_IRQHandler,Default_Handler  
 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
