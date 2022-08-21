@@ -25,7 +25,7 @@ build: cmake
 
 cmake: $(BUILD_DIR)/Makefile
 
-$(BUILD_DIR)/Makefile:
+$(BUILD_DIR)/Makefile: CMakeLists.txt
 	cmake \
 		-G "$(BUILD_SYSTEM)" \
 		-B$(BUILD_DIR) \
