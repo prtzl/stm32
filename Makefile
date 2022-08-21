@@ -1,4 +1,4 @@
-.PHONY: all build build-container cmake format flash-stlink flash-jlink format-container shell image build-container clean clean-image clean-all
+.PHONY: all build build-container cmake format format-linux flash-stlink flash-jlink format-container shell image build-container clean clean-image clean-all
 ############################### Native Makefile ###############################
 
 PROJECT_NAME ?= firmware
@@ -35,16 +35,27 @@ $(BUILD_DIR)/Makefile:
 		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
 		-DDUMP_ASM=OFF
 
-SRCS := $(shell find . -name '*.[ch]' -or -name '*.[ch]pp')
+# Formats all user modified source files (add ones that are missing)
+SRCS := $(shell find Project -name '*.[ch]' -or -name '*.[ch]pp') Core/Src/main.c
 format: $(addsuffix .format,$(SRCS))
 %.format: %
 	clang-format -i $<
+
+# Formats all CubeMX generated sources to unix style - removes \r from line endings
+# Add any new directories, like Middlewares and hidden files
+HIDDEN_FILES := .mxproject .project .cproject
+FOUND_HIDDEN_FILES := $(shell for f in $(HIDDEN_FILES);do if [[ -e $$f ]]; then echo $$f;fi; done)
+FORMAT_LINUX := $(shell find Core Drivers -name '*' -type f; find . -name '*.ioc') $(FOUND_HIDDEN_FILES)
+
+format-linux: $(addsuffix .format-linux,$(FORMAT_LINUX))
+%.format-linux: %
+	$(if $(filter $(PLATFORM),Linux),dos2unix -q $<,)
 
 # Device specific!
 DEVICE ?= STM32F407VG
 
 flash-st: build
-	st-flash --reset write $(BUILD_DIR)/$(PROJECT_NAME).bin 0x08000000
+	st-flash --reset write $(FIRMWARE) 0x08000000
 
 $(BUILD_DIR)/jlink-script:
 	touch $@
@@ -100,6 +111,9 @@ build-container: $(NEED_IMAGE)
 
 format-container:
 	$(CONTAINER_RUN) bash -lc 'make format -j$(shell nproc)'
+
+format-linux-container:
+	$(CONTAINER_RUN) bash -lc 'make format-linux'
 
 shell:
 	$(CONTAINER_RUN) bash -l

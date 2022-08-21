@@ -45,7 +45,7 @@
 
       devShell.${system} = pkgs.mkShell {
         nativeBuildInputs = (firmware.nativeBuildInputs or [ ])
-          ++ [ pkgs.clang-tools jlink pkgs.stlink ];
+          ++ [ pkgs.clang-tools jlink pkgs.stlink pkgs.dos2unix ];
         LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [ pkgs.llvmPackages_11.llvm ];
       };
     };
