@@ -1,7 +1,10 @@
 {
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    jlink-pack.url = "github:prtzl/jlink-nix"; # jlink debugger support
+    jlink-pack = {
+      url = "github:prtzl/jlink-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs:
@@ -10,7 +13,9 @@
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
       stdenv = pkgs.stdenv;
-      jlink = jlink-pack.defaultPackage.${system};
+      jlink = jlink-pack.defaultPackage.${system}.overrideAttrs (attrs: {
+        meta.licence = null;
+      });
       
       firmware = pkgs.callPackage ./default.nix { };
       
