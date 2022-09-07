@@ -5,15 +5,14 @@
       url = "github:prtzl/jlink-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = inputs:
-    with inputs;
+  outputs = inputs: inputs.flake-utils.lib.eachDefaultSystem (system:
     let
-      system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
+      pkgs = inputs.nixpkgs.legacyPackages.${system};
       stdenv = pkgs.stdenv;
-      jlink = jlink-pack.defaultPackage.${system}.overrideAttrs (attrs: {
+      jlink = inputs.jlink-pack.defaultPackage.${system}.overrideAttrs (attrs: {
         meta.licence = null;
       });
       
@@ -22,7 +21,7 @@
       flash-stlink = pkgs.writeShellApplication {
         name = "flash-stlink";
         text = "st-flash --reset write ${firmware}/bin/${firmware.name}.bin 0x08000000";
-        runtimeInputs = [ stlink ];
+        runtimeInputs = [ pkgs.stlink ];
       };
       
       jlink-script = pkgs.writeTextFile {
@@ -43,15 +42,17 @@
         text = "JLinkExe -commanderscript ${jlink-script}";
         runtimeInputs = [ jlink ];
       };
-    in {
+    in
+    {
       inherit firmware flash-jlink flash-stlink;
       
-      defaultPackage.${system} = firmware;
+      defaultPackage = firmware;
+      defaultApp = flash-jlink;
 
-      devShell.${system} = pkgs.mkShell {
+      devShell = pkgs.mkShell {
         nativeBuildInputs = (firmware.nativeBuildInputs or [ ])
           ++ [ pkgs.clang-tools jlink pkgs.stlink pkgs.dos2unix ];
         LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [ pkgs.llvmPackages_11.llvm ];
       };
-    };
+  });
 }
