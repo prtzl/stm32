@@ -14,7 +14,29 @@ You can also install `direnv` to your shell along with `nix-direnv` and run `dir
 
 ## Workflow
 
-To build the project, run `nix build`. If successful, the resulting `.bin`, `.elf` and `.s` files will be placed into symlink directory `result`. *Not 100% sure: As long as this link is in the project, nix garbage collector will not remove the project derivation, which can be problematic if you have a slower connection or you are offline.*  
+To build the project, run
+
+```shell
+nix build # optionaly add -L to see the progress
+```
+
+Default target is currently set to be the firmware.  
+If successful, the resulting `.bin`, `.elf` and `.s` files will be placed into symlink directory `./result/bin`.  
+
+To flash the firmware you can currently use stlink or jlink. The run command depends on firmware, which will be built if missing or if the source files have been changed.
+
+```shell
+# Default run target - currently jlink
+nix run
+
+# Run jlink flasher
+nix run .#flash-jlink
+
+# Run stlink flasher
+nix run .#flash-stlink
+```
+
+If you're using `nix-direnv`, then the first time you load up the development shell it will download all the inputs and create a cache directory `.direnv`. As long as this directory remains, nix garbage collector won't touch it. You can see the link for all such repositories in `/nix/var/nix/gcroots`, where the exsistance of a link signals nix garbage collector to leave the repository sources alone.  
 
 In development mode use the provided [Makefile](../Makefile) as described in [native development](build-native.md), which generates build files along with `compile_commands.json` in `build` folder. You can use this in your IDE of choice. You can also use nix to generate those files, but make sure, that your IDE was launched from the development shell or, in case of vscode, you have nix plugins installed.  
 
@@ -22,7 +44,7 @@ In development mode use the provided [Makefile](../Makefile) as described in [na
 
 Pros:  
 
-* Dependencies are not installed system-wide and do not pollute your file system.  
+* Dependencies are not installed system-wide and do not pollute your filesystem.  
 * Project dependencies version is fixed with lock file and only updates on users request.  
 * You can still use the provided [Makefile](../Makefile) as with [native development](build-native.md) as the shell loads all the dependencies.  
 * For the above reason, you can also use your favorite IDE.  
