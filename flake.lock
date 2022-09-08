@@ -22,26 +22,26 @@
         ]
       },
       "locked": {
-        "lastModified": 1649509919,
-        "narHash": "sha256-Z1cIIPv0D/95Y/0aGIo8sAffBrgMyzspaeTdCMMVGp4=",
-        "owner": "prtzl",
-        "repo": "jlink-nix",
-        "rev": "cb09ab8e7935e38c474d23b145bca0640c46cc76",
-        "type": "github"
+        "lastModified": 1662662815,
+        "narHash": "sha256-l6ZoTNN9UlKEHgYY+ZjlclXhnMGmbO9UNlLn9V3iokA=",
+        "ref": "refs/heads/flash-script",
+        "rev": "34cf7d9b13dbe558b877b02b018182599c210015",
+        "revCount": 8,
+        "type": "git",
+        "url": "file:///home/matej/projects/jlink-pack"
       },
       "original": {
-        "owner": "prtzl",
-        "repo": "jlink-nix",
-        "type": "github"
+        "type": "git",
+        "url": "file:///home/matej/projects/jlink-pack"
       }
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1651726670,
-        "narHash": "sha256-dSGdzB49SEvdOJvrQWfQYkAefewXraHIV08Vz6iDXWQ=",
+        "lastModified": 1662019588,
+        "narHash": "sha256-oPEjHKGGVbBXqwwL+UjsveJzghWiWV0n9ogo1X6l4cw=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "c777cdf5c564015d5f63b09cc93bef4178b19b01",
+        "rev": "2da64a81275b68fdad38af669afeda43d401e94b",
         "type": "github"
       },
       "original": {
