@@ -13,17 +13,17 @@
       pkgs = inputs.nixpkgs.legacyPackages.${system};
       stdenv = pkgs.stdenv;
       jlink = inputs.jlink-pack.defaultPackage.${system}.overrideAttrs (attrs: {
-        meta.licence = null;
+        meta.license = "";
       });
-      
+
       firmware = pkgs.callPackage ./default.nix { };
-      
+
       flash-stlink = pkgs.writeShellApplication {
         name = "flash-stlink";
         text = "st-flash --reset write ${firmware}/bin/${firmware.name}.bin 0x08000000";
         runtimeInputs = [ pkgs.stlink ];
       };
-      
+
       jlink-script = pkgs.writeTextFile {
         name = "jlink-script";
         text = ''
@@ -36,7 +36,7 @@
           qc
         '';
       };
-      
+
       flash-jlink = pkgs.writeShellApplication {
         name = "flash-jlink";
         text = "JLinkExe -commanderscript ${jlink-script}";
@@ -45,14 +45,14 @@
     in
     {
       inherit firmware flash-jlink flash-stlink;
-      
+
       defaultPackage = firmware;
       defaultApp = flash-jlink;
 
       devShell = pkgs.mkShell {
         nativeBuildInputs = (firmware.nativeBuildInputs or [ ])
-          ++ [ pkgs.clang-tools jlink pkgs.stlink pkgs.dos2unix ];
+          ++ [ pkgs.clang-tools jlink pkgs.stlink pkgs.dos2unix pkgs.glibc_multi ];
         LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [ pkgs.llvmPackages_11.llvm ];
       };
-  });
+    });
 }
