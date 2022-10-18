@@ -31,7 +31,6 @@ $(BUILD_DIR)/Makefile: CMakeLists.txt
 		-B$(BUILD_DIR) \
 		-DPROJECT_NAME=$(PROJECT_NAME) \
 		-DCMAKE_BUILD_TYPE=$(BUILD_TYPE) \
-		-DCMAKE_TOOLCHAIN_FILE=gcc-arm-none-eabi.cmake \
 		-DDUMP_ASM=OFF
 
 # Formats all user modified source files (add ones that are missing)

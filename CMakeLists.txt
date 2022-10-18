@@ -1,17 +1,21 @@
 # STM32 Minimal CMake project for C/C++ projects
 cmake_minimum_required(VERSION 3.12)
 ###############################################################################
-# Set project name and source code folder location
 
+include(./gcc-arm-none-eabi.cmake)
+
+# Set project name and some defaults
+if ("${PROJECT_NAME}" STREQUAL "")
+    set(PROJECT_NAME firmware)
+endif()
 project(${PROJECT_NAME})
-set(PROJECT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Project)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Set debug mode as default
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
     set(CMAKE_BUILD_TYPE Debug)
 endif()
 message("Build type: ${CMAKE_BUILD_TYPE}")
-option(DUMP_ASM "Create full assembly of final executable" OFF)
 
 # Set microcontroller information
 set(MCU_FAMILY STM32F4xx)
@@ -36,8 +40,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
 set(CMAKE_CXX_EXTENSIONS ON)
-
 ###############################################################################
+
 set(STM32CUBEMX_INCLUDE_DIRECTORIES
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/Inc
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/${MCU_FAMILY}_HAL_Driver/Inc
@@ -51,6 +55,7 @@ file(GLOB_RECURSE STM32CUBEMX_SOURCES CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/*.c)
 
+set(PROJECT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Project)
 file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS
     ${PROJECT_DIR}/*.cpp
     ${PROJECT_DIR}/*.c)
@@ -101,6 +106,7 @@ target_link_options(${EXECUTABLE} PRIVATE
     -lstdc++
     -Wl,--end-group
     -Wl,--print-memory-usage)
+###############################################################################
 
 # The last command can take a couple of seconds on larger project, usefull for debugging
 add_custom_command(TARGET ${EXECUTABLE} POST_BUILD
@@ -108,6 +114,7 @@ add_custom_command(TARGET ${EXECUTABLE} POST_BUILD
     COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:${EXECUTABLE}> ${EXECUTABLE}.hex
     COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:${EXECUTABLE}> ${EXECUTABLE}.bin)
 
+option(DUMP_ASM "Create full assembly of final executable" OFF)
 if (${DUMP_ASM})
     add_custom_command(TARGET ${EXECUTABLE} POST_BUILD
         COMMAND ${CMAKE_OBJDUMP} -D -C $<TARGET_FILE:${EXECUTABLE}> > ${EXECUTABLE}.s)
