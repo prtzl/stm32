@@ -6,10 +6,11 @@
 }:
 
 stdenv.mkDerivation rec {
-  name = "firmware";
+  pname = "firmware";
+  version = "0.0.1";
   src = ./.;
 
-    nativeBuildInputs = [ cmake gnumake gcc-arm-embedded ];
+  nativeBuildInputs = [ cmake gnumake gcc-arm-embedded ];
 
   dontPatch = true;
   dontFixup = true;
@@ -22,9 +23,8 @@ stdenv.mkDerivation rec {
   device = "STM32F407VG";
 
   cmakeFlags = [
-    "-DPROJECT_NAME=${name}"
+    "-DPROJECT_NAME=${pname}"
     "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
-    "-DCMAKE_TOOLCHAIN_FILE=gcc-arm-none-eabi.cmake"
     #"-DDUMP_ASM=ON"
   ];
 
