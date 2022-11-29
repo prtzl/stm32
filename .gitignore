@@ -20,6 +20,7 @@
 !Dockerfile
 !docker-compose.yml
 !.dockerignore
+!generate.sh
 
 # EXAMPLE
 !Core
