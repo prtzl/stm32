@@ -22,11 +22,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1661966822,
-        "narHash": "sha256-ejea5FmrwnTNdxU0NgK2wQMxtvyzZIrMRjVcNZNWW/g=",
+        "lastModified": 1673442584,
+        "narHash": "sha256-TjKszHI6FkTSAQH2VdmQTE/2o3Mf90wfRXZwjIQo+WQ=",
         "owner": "prtzl",
         "repo": "jlink-nix",
-        "rev": "8f98944ad331f025f5e210edc2344df709ad6f52",
+        "rev": "466543d48809e66c48cf7fbec3b5e597c6b7242f",
         "type": "github"
       },
       "original": {
