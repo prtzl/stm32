@@ -1,11 +1,11 @@
-{ stdenv
+{ stdenvNoCC
 , cmake
 , gnumake
 , gcc-arm-embedded
 , clang-tools
 }:
 
-stdenv.mkDerivation rec {
+stdenvNoCC.mkDerivation rec {
   pname = "firmware";
   version = "0.0.1";
   src = ./.;
@@ -17,15 +17,13 @@ stdenv.mkDerivation rec {
   dontStrip = true;
   dontPatchELF = true;
 
-  CMAKE_BUILD_SYSTEM = "Unix Makefiles";
-  CMAKE_BUILD_TYPE = "Debug";
-
   device = "STM32F407VG";
 
   cmakeFlags = [
+    "-GUnix Makefiles"
     "-DPROJECT_NAME=${pname}"
-    "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
-    #"-DDUMP_ASM=ON"
+    "-DCMAKE_BUILD_TYPE=Debug"
+    "-DDUMP_ASM=OFF"
   ];
 
   installPhase = ''
