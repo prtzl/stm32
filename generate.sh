@@ -79,6 +79,11 @@ if [[ "$FORCE" != "" ]]; then
     fi
 fi
 
+pushd $INSTALL_DIR
+git reset --hard
+git clean -fdx
+popd
+
 # Copy sources
 info "Copying sources"
 FILES_BUILD="CMakeLists.txt gcc-arm-none-eabi.cmake Makefile .clang-format"
@@ -92,17 +97,26 @@ for f in $FILES_BUILD $FILES_NIX $FILES_CONTAINER; do
 done
 
 # Try replacing defines, library paths and MCU type from .mxproject file
-if [ ! -f $INSTALL_DIR/.mxproject ]; then
-    info "No .mxproject file found in $INSTALL_DIR, skipping mod"
+mxproject=$(find $INSTALL_DIR -name '.mxproject')
+if [ ! -f $mxproject ]; then
+    info "No .mxproject file found in $INSTALL_DIR, skipping further modification of config sources!"
     exit 0
 fi
 
-# Find startup and linker files
-STARTUP_FILE=$(find $INSTALL_DIR -name 'startup*' -and -name '*.s')
-LINKER_SCRIPT=$(find $INSTALL_DIR -name '*FLASH.ld')
+# Find startup and linker files - will only take first found path
+pushd $INSTALL_DIR
+STARTUP_SCRIPT_RELPATH=$(find -name 'startup*' -and -name '*.s' | head -n1 | sed 's/^\.\///')
+STARTUP_SCRIPT_PATH="$INSTALL_DIR/$STARTUP_SCRIPT_RELPATH"
+LINKER_SCRIPT_RELPATH=$(find -name '*FLASH.ld' | head -n1 | sed 's/^\.\///')
+LINKER_SCRIPT_PATH="$INSTALL_DIR/$LINKER_SCRIPT_RELPATH"
+popd
+if [[ ! -f "$STARTUP_SCRIPT_PATH" || ! -f "$LINKER_SCRIPT_PATH" ]]; then
+    abort "Startup and/or linker files not found in $INSTALL_DIR!"
+fi
 
-# Find MCU_MODEL from .mxproject
-MCU_MODEL_LN=$(grep '^CDefines' $INSTALL_DIR/.mxproject)
+# Get the MCU model from .mxproject file. Example line:
+# CDefines=USE_HAL_DRIVER;STM32F303x8;USE_HAL_DRIVER;USE_HAL_DRIVER;
+MCU_MODEL_LN=$(grep '^CDefines' $mxproject)
 IFS=';' read -ra array <<< "$MCU_MODEL_LN"
 MCU_MODEL=""
 for w in "${array[@]}"; do
@@ -111,9 +125,15 @@ for w in "${array[@]}"; do
         break
     fi
 done
+if [[ "$MCU_MODEL" == "" ]]; then
+    abort "MCU model name not found in $mxproject"
+else
+    info "MCU model: $MCU_MODEL"
+fi
 
-# Find MCU_FAMILY from .mxproject
-MCU_FAMILY_LN=$(grep '^LibFiles' $INSTALL_DIR/.mxproject)
+# Get the MCU family from driver paths in .mxproject file. Example line:
+# LibFiles=Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h; ...
+MCU_FAMILY_LN=$(grep '^LibFiles' $mxproject | sed 's/\n//g')
 IFS='/' read -ra array <<< "$MCU_FAMILY_LN"
 MCU_FAMILY=""
 for w in "${array[@]}"; do
@@ -125,9 +145,14 @@ for w in "${array[@]}"; do
         fi
     done
 done
+if [[ "$MCU_FAMILY" == "" ]]; then
+    abort "MCU family name not found in $mxproject"
+else
+    info "Family: $MCU_FAMILY"
+fi
 
 # Find cortex type and choose fpu
-CPU_CORE_LN=$(grep '.cpu' $STARTUP_FILE)
+CPU_CORE_LN=$(grep '.cpu' $STARTUP_SCRIPT_PATH)
 IFS=' ' read -ra array <<< "$CPU_CORE_LN"
 CPU_CORE=""
 for w in "${array[@]}"; do
@@ -138,41 +163,53 @@ for w in "${array[@]}"; do
     fi
 done
 if [[ "$CPU_CORE" == "" ]]; then
-    abort "Could not find core type!"
+    abort "Could not find core type from $STARTUP_SCRIPT_PATH!"
 fi
 
 FPU_TYPE=""
 FPU_MODE=""
 case $CPU_CORE in
     4) FPU_TYPE="fpv4-sp-d16"; FPU_MODE="hard";;
-    *) abort "Unsupported FPU type!";;
+    *) info "No FPU for this CPU core!";;
 esac
 
 info "Found project info:"
 succ \
 "MCU_MODEL: $MCU_MODEL\n"\
 "MCU_FAMILY: $MCU_FAMILY\n"\
-"CPU: $CPU_CORE, FPU: $FPU_TYPE, $FPU_MODE\n"\
-"STARTUP_FILE: $STARTUP_FILE\n"\
-"LINKER_SCRIPT: $LINKER_SCRIPT"
+"CPU: $CPU_CORE, FPU: $FPU_TYPE, FPU_MODE: $FPU_MODE\n"\
+"STARTUP_SCRIPT: $STARTUP_SCRIPT_PATH\n"\
+"LINKER_SCRIPT: $LINKER_SCRIPT_PATH"
 
-# Find and replace definitions in CMakeLists.txt
+# INFO: just for testing
+pushd $INSTALL_DIR
+git add .
+popd
+
 function replace()
 {
     file=$1
     find=$2
     replace=$3
-    sed -i "s/$find/$replace/g" $file
+    sed -i "s@$find@$replace@g" -- $file
 }
 
-replace $INSTALL_DIR/CMakeLists.txt "set(MCU_FAMILY.*" "set(MCU_FAMILY $MCU_FAMILY)"
-replace $INSTALL_DIR/CMakeLists.txt "set(MCU_MODEL.*" "set(MCU_MODEL $MCU_MODEL)"
-out="${STARTUP_FILE/${INSTALL_DIR}\//}"
-out="${out/\//\\/}"
-replace $INSTALL_DIR/CMakeLists.txt "set(STARTUP_SCRIPT.*" "set(STARTUP_SCRIPT \${CMAKE_CURRENT_SOURCE_DIR}\/$out)"
-out="${LINKER_SCRIPT/${INSTALL_DIR}\//}"
-out="${out/\//\\/}"
-replace $INSTALL_DIR/CMakeLists.txt "set(MCU_LINKER_SCRIPT.*" "set(MCU_LINKER_SCRIPT \${CMAKE_CURRENT_SOURCE_DIR}\/$out)"
+function replace_cmake_set()
+{
+    file=$1
+    option=$2
+    replace=$3
+    replace $1 "^set($option.*" "set($option $replace)"
+}
+
+# Modify MCU definitions
+replace_cmake_set $INSTALL_DIR/CMakeLists.txt "MCU_MODEL" "$MCU_MODEL" 
+replace_cmake_set $INSTALL_DIR/CMakeLists.txt "MCU_FAMILY" "$MCU_FAMILY" 
+replace_cmake_set $INSTALL_DIR/CMakeLists.txt "STARTUP_SCRIPT" "\${CMAKE_CURRENT_SOURCE_DIR}/$STARTUP_SCRIPT_RELPATH" 
+replace_cmake_set $INSTALL_DIR/CMakeLists.txt "MCU_LINKER_SCRIPT" "\${CMAKE_CURRENT_SOURCE_DIR}/$LINKER_SCRIPT_RELPATH" 
+
+# Modify/remove/add CPU definitions
+# NOTE: Should delete the fpu options, if they don't exist
 replace $INSTALL_DIR/CMakeLists.txt "-mcpu=cortex-m.*" "-mcpu=cortex-m$CPU_CORE"
 replace $INSTALL_DIR/CMakeLists.txt "-mfpu=.*" "-mfpu=$FPU_TYPE"
 replace $INSTALL_DIR/CMakeLists.txt "-mfloat-abi=.*" "-mfloat-abi=$FPU_MODE)"
