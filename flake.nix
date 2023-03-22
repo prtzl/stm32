@@ -49,7 +49,7 @@
       defaultPackage = firmware;
       defaultApp = flash-jlink;
 
-      devShell = pkgs.mkShell {
+      devShell = pkgs.mkShellNoCC {
         nativeBuildInputs = (firmware.nativeBuildInputs or [ ])
           ++ [ pkgs.clang-tools jlink pkgs.stlink pkgs.dos2unix pkgs.glibc_multi ];
         LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [ pkgs.llvmPackages_11.llvm ];

@@ -17,15 +17,12 @@ stdenv.mkDerivation rec {
   dontStrip = true;
   dontPatchELF = true;
 
-  CMAKE_BUILD_SYSTEM = "Unix Makefiles";
-  CMAKE_BUILD_TYPE = "Debug";
-
   device = "STM32F407VG";
 
   cmakeFlags = [
     "-DPROJECT_NAME=${pname}"
-    "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
-    #"-DDUMP_ASM=ON"
+    "-DCMAKE_BUILD_TYPE=Debug"
+    "-DDUMP_ASM=OFF"
   ];
 
   installPhase = ''
