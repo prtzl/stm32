@@ -1,11 +1,11 @@
-{ stdenvNoCC
+{ stdenv
 , cmake
 , gnumake
 , gcc-arm-embedded
 , clang-tools
 }:
 
-stdenvNoCC.mkDerivation rec {
+stdenv.mkDerivation rec {
   pname = "firmware";
   version = "0.0.1";
   src = ./.;
