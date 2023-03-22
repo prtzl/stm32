@@ -20,7 +20,6 @@ stdenv.mkDerivation rec {
   device = "STM32F407VG";
 
   cmakeFlags = [
-    "-GUnix Makefiles"
     "-DPROJECT_NAME=${pname}"
     "-DCMAKE_BUILD_TYPE=Debug"
     "-DDUMP_ASM=OFF"
