@@ -4,6 +4,7 @@ Def='\e[0m';
 Gre='\e[0;32m';
 Red='\e[0;31m';
 Blu='\e[0;34m';
+Ora='\e[0;33m';
 
 function print()
 {
@@ -18,6 +19,11 @@ function error()
 function info()
 {
     print $Blu"$@"
+}
+
+function warn()
+{
+    print $Ora"$@"
 }
 
 function succ()
@@ -43,35 +49,16 @@ function check()
 # AUTO_GIT="y"
 HELP="./generate.sh <g/a> <destination directory>"
 
-# Check generation type
-GENTYPE=$1
-if [[ "$GENTYPE" == "" ]]; then
-    abort "$HELP"
-elif [[ "$GENTYPE" != "g" && "$GENTYPE" != "a" ]]; then
-    abort "Select generate type!\n$HELP"
-fi
-
 # Check input destination directory validity
-INSTALL_DIR=$2
+INSTALL_DIR=$1
 if [[ "$INSTALL_DIR" == "" ]]; then
     abort "$HELP"
-elif [[ -d $INSTALL_DIR ]]; then
-    if [[ "$GENTYPE" == "g" ]]; then
-        abort "Directory $INSTALL_DIR already exists!"
-    fi
-else
-    if [[ "$GENTYPE" == "a" ]]; then
-        abort "Directory $INSTALL_DIR does not exists!"
-    fi
-    BASEDIR=$(dirname $INSTALL_DIR)
-    if [[ ! -d $BASEDIR ]]; then
-        abort "Base path for $INSTALL_DIR is invalid!"
-    fi
-    info "Generating directory $INSTALL_DIR"
-    mkdir -p $INSTALL_DIR
+elif [[ ! -d $INSTALL_DIR ]]; then
+    abort "Directory $INSTALL_DIR does not exists!"
 fi
 
-FORCE=$3
+# Overwrite existing files
+FORCE=$2
 if [[ "$FORCE" != "" ]]; then
     if [[ "$FORCE" != "-f" ]]; then
         abort "Unknown flag: $FORCE"
@@ -79,6 +66,9 @@ if [[ "$FORCE" != "" ]]; then
         FORCE="y"
     fi
 fi
+
+# Greet
+succ "STM32 project template bringup @ $INSTALL_DIR $(if [[ "$FORCE" == "y" ]]; then echo -n 'with FORCE'; fi)"
 
 if [[ "$AUTO_GIT" == "y" ]]; then
     pushd $INSTALL_DIR
@@ -88,14 +78,16 @@ if [[ "$AUTO_GIT" == "y" ]]; then
 fi
 
 # Copy sources
-info "Copying sources"
+info "Copying sources to $INSTALL_DIR"
 FILES_BUILD="CMakeLists.txt gcc-arm-none-eabi.cmake Makefile .clang-format"
 FILES_NIX="flake.nix flake.lock default.nix .envrc"
 FILES_CONTAINER="Dockerfile docker-compose.yml .dockerignore"
 for f in $FILES_BUILD $FILES_NIX $FILES_CONTAINER; do
     if [[ -f $INSTALL_DIR/$f && "$FORCE" != "y" ]]; then
-        abort "File $INSTALL_DIR/$f already exists!"
+        warn "\tFile $INSTALL_DIR/$f already exists!"
+        continue
     fi
+    print "\tCopying: $f"
     cp $f $INSTALL_DIR
 done
 
@@ -173,13 +165,13 @@ case $CPU_CORE in
     *) info "No FPU for this CPU core!";;
 esac
 
-succ "Found project info:"
-succ "MCU_MODEL: $MCU_MODEL"
-succ "MCU_FAMILY: $MCU_FAMILY"
-succ "CPU: $CPU_CORE, FPU: $FPU_TYPE, FPU_MODE: $FPU_MODE"
-if [[ "$CPU_CORE" == "m7" ]]; then succ "M7: check if CPU supports double precission float (remove -sp from -mfpu)"; fi
-succ "STARTUP_SCRIPT: $STARTUP_SCRIPT_PATH"
-succ "LINKER_SCRIPT: $LINKER_SCRIPT_PATH"
+info "Found project info:"
+print "\tMCU_MODEL: $MCU_MODEL"
+print "\tMCU_FAMILY: $MCU_FAMILY"
+print "\tCPU: $CPU_CORE, FPU: $FPU_TYPE, FPU_MODE: $FPU_MODE"
+if [[ "\t$CPU_CORE" == "m7" ]]; then warn "M7: check if CPU supports double precission float (remove -sp from -mfpu)"; fi
+print "\tSTARTUP_SCRIPT: $STARTUP_SCRIPT_RELPATH"
+print "\tLINKER_SCRIPT: $LINKER_SCRIPT_RELPATH"
 
 if [[ "$AUTO_GIT" == "y" ]]; then
     pushd $INSTALL_DIR
@@ -228,7 +220,6 @@ replace_cmake_set $INSTALL_DIR/CMakeLists.txt "STARTUP_SCRIPT" "\${CMAKE_CURRENT
 replace_cmake_set $INSTALL_DIR/CMakeLists.txt "MCU_LINKER_SCRIPT" "\${CMAKE_CURRENT_SOURCE_DIR}/$LINKER_SCRIPT_RELPATH" 
 
 # Modify/remove/add CPU definitions
-# NOTE: Should delete the fpu options, if they don't exist
 replace $INSTALL_DIR/CMakeLists.txt "-mcpu.*" "-mcpu=cortex-$CPU_CORE"
 if [[ "$FPU_TYPE" == "" ]]; then
     remove $INSTALL_DIR/CMakeLists.txt "-mfpu.*"
@@ -239,4 +230,4 @@ else
     replace $INSTALL_DIR/CMakeLists.txt "-mfloat-abi=.*" "-mfloat-abi=$FPU_MODE)"
 fi
 
-info "Finished!"
+succ "Finished!"
