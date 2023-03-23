@@ -21,8 +21,8 @@ message("Build type: ${CMAKE_BUILD_TYPE}")
 set(MCU_FAMILY STM32F4xx)
 set(MCU_MODEL STM32F407xx)
 set(CPU_PARAMETERS
-    -mcpu=cortex-m4
     -mthumb
+    -mcpu=cortex-m4
     -mfpu=fpv4-sp-d16
     -mfloat-abi=hard)
 

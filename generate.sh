@@ -40,6 +40,7 @@ function check()
 
 ################################################################################
 
+# AUTO_GIT="y"
 HELP="./generate.sh <g/a> <destination directory>"
 
 # Check generation type
@@ -79,10 +80,12 @@ if [[ "$FORCE" != "" ]]; then
     fi
 fi
 
-pushd $INSTALL_DIR
-git reset --hard
-git clean -fdx
-popd
+if [[ "$AUTO_GIT" == "y" ]]; then
+    pushd $INSTALL_DIR
+    git reset --hard
+    git clean -fdx
+    popd
+fi
 
 # Copy sources
 info "Copying sources"
@@ -104,12 +107,12 @@ if [ ! -f $mxproject ]; then
 fi
 
 # Find startup and linker files - will only take first found path
-pushd $INSTALL_DIR
+pushd $INSTALL_DIR > /dev/null
 STARTUP_SCRIPT_RELPATH=$(find -name 'startup*' -and -name '*.s' | head -n1 | sed 's/^\.\///')
 STARTUP_SCRIPT_PATH="$INSTALL_DIR/$STARTUP_SCRIPT_RELPATH"
 LINKER_SCRIPT_RELPATH=$(find -name '*FLASH.ld' | head -n1 | sed 's/^\.\///')
 LINKER_SCRIPT_PATH="$INSTALL_DIR/$LINKER_SCRIPT_RELPATH"
-popd
+popd > /dev/null
 if [[ ! -f "$STARTUP_SCRIPT_PATH" || ! -f "$LINKER_SCRIPT_PATH" ]]; then
     abort "Startup and/or linker files not found in $INSTALL_DIR!"
 fi
@@ -127,8 +130,6 @@ for w in "${array[@]}"; do
 done
 if [[ "$MCU_MODEL" == "" ]]; then
     abort "MCU model name not found in $mxproject"
-else
-    info "MCU model: $MCU_MODEL"
 fi
 
 # Get the MCU family from driver paths in .mxproject file. Example line:
@@ -147,8 +148,6 @@ for w in "${array[@]}"; do
 done
 if [[ "$MCU_FAMILY" == "" ]]; then
     abort "MCU family name not found in $mxproject"
-else
-    info "Family: $MCU_FAMILY"
 fi
 
 # Find cortex type and choose fpu
@@ -157,7 +156,7 @@ IFS=' ' read -ra array <<< "$CPU_CORE_LN"
 CPU_CORE=""
 for w in "${array[@]}"; do
     if [[ "$w" == "cortex"* ]]; then
-        RAW=${w/cortex-m/}
+        RAW=${w/cortex-/}
         CPU_CORE=$(echo $RAW | tr -d '\r')
         break
     fi
@@ -169,23 +168,26 @@ fi
 FPU_TYPE=""
 FPU_MODE=""
 case $CPU_CORE in
-    4) FPU_TYPE="fpv4-sp-d16"; FPU_MODE="hard";;
+    m4) FPU_TYPE="fpv4-sp-d16"; FPU_MODE="hard";;
+    m7) FPU_TYPE="fpv5-sp-d16"; FPU_MODE="hard";;
     *) info "No FPU for this CPU core!";;
 esac
 
-info "Found project info:"
-succ \
-"MCU_MODEL: $MCU_MODEL\n"\
-"MCU_FAMILY: $MCU_FAMILY\n"\
-"CPU: $CPU_CORE, FPU: $FPU_TYPE, FPU_MODE: $FPU_MODE\n"\
-"STARTUP_SCRIPT: $STARTUP_SCRIPT_PATH\n"\
-"LINKER_SCRIPT: $LINKER_SCRIPT_PATH"
+succ "Found project info:"
+succ "MCU_MODEL: $MCU_MODEL"
+succ "MCU_FAMILY: $MCU_FAMILY"
+succ "CPU: $CPU_CORE, FPU: $FPU_TYPE, FPU_MODE: $FPU_MODE"
+if [[ "$CPU" == "m7" ]]; then succ "M7: check if has double precission float (remove -sp from -mfpu)"; fi
+succ "STARTUP_SCRIPT: $STARTUP_SCRIPT_PATH"
+succ "LINKER_SCRIPT: $LINKER_SCRIPT_PATH"
 
-# INFO: just for testing
-pushd $INSTALL_DIR
-git add .
-popd
+if [[ "$AUTO_GIT" == "y" ]]; then
+    pushd $INSTALL_DIR
+    git add .
+    popd
+fi
 
+# Find and replace expression in files
 function replace()
 {
     file=$1
@@ -194,6 +196,23 @@ function replace()
     sed -i "s@$find@$replace@g" -- $file
 }
 
+# If expression is not found, it is removed
+function remove()
+{
+    file=$1
+    find=$2
+    sed -i "/$find/d" -- $file
+}
+
+function append()
+{
+    file=$1
+    find=$2
+    append=$3
+    sed -i "s@$find@&$append@" -- $file
+}
+
+# Find and replace cmake set configurations (single line only ...)
 function replace_cmake_set()
 {
     file=$1
@@ -210,8 +229,14 @@ replace_cmake_set $INSTALL_DIR/CMakeLists.txt "MCU_LINKER_SCRIPT" "\${CMAKE_CURR
 
 # Modify/remove/add CPU definitions
 # NOTE: Should delete the fpu options, if they don't exist
-replace $INSTALL_DIR/CMakeLists.txt "-mcpu=cortex-m.*" "-mcpu=cortex-m$CPU_CORE"
-replace $INSTALL_DIR/CMakeLists.txt "-mfpu=.*" "-mfpu=$FPU_TYPE"
-replace $INSTALL_DIR/CMakeLists.txt "-mfloat-abi=.*" "-mfloat-abi=$FPU_MODE)"
+replace $INSTALL_DIR/CMakeLists.txt "-mcpu.*" "-mcpu=cortex-$CPU_CORE"
+if [[ "$FPU_TYPE" == "" ]]; then
+    remove $INSTALL_DIR/CMakeLists.txt "-mfpu.*"
+    remove $INSTALL_DIR/CMakeLists.txt "-mfloat-abi.*"
+    append $INSTALL_DIR/CMakeLists.txt "-mcpu.*" ")"
+else
+    replace $INSTALL_DIR/CMakeLists.txt "-mfpu=.*" "-mfpu=$FPU_TYPE"
+    replace $INSTALL_DIR/CMakeLists.txt "-mfloat-abi=.*" "-mfloat-abi=$FPU_MODE)"
+fi
 
 info "Finished!"
