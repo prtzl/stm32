@@ -177,7 +177,7 @@ succ "Found project info:"
 succ "MCU_MODEL: $MCU_MODEL"
 succ "MCU_FAMILY: $MCU_FAMILY"
 succ "CPU: $CPU_CORE, FPU: $FPU_TYPE, FPU_MODE: $FPU_MODE"
-if [[ "$CPU" == "m7" ]]; then succ "M7: check if has double precission float (remove -sp from -mfpu)"; fi
+if [[ "$CPU_CORE" == "m7" ]]; then succ "M7: check if CPU supports double precission float (remove -sp from -mfpu)"; fi
 succ "STARTUP_SCRIPT: $STARTUP_SCRIPT_PATH"
 succ "LINKER_SCRIPT: $LINKER_SCRIPT_PATH"
 
