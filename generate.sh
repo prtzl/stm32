@@ -214,10 +214,10 @@ function replace_cmake_set()
 }
 
 # Modify MCU definitions
-replace_cmake_set $INSTALL_DIR/CMakeLists.txt "MCU_MODEL" "$MCU_MODEL" 
-replace_cmake_set $INSTALL_DIR/CMakeLists.txt "MCU_FAMILY" "$MCU_FAMILY" 
-replace_cmake_set $INSTALL_DIR/CMakeLists.txt "STARTUP_SCRIPT" "\${CMAKE_CURRENT_SOURCE_DIR}/$STARTUP_SCRIPT_RELPATH" 
-replace_cmake_set $INSTALL_DIR/CMakeLists.txt "MCU_LINKER_SCRIPT" "\${CMAKE_CURRENT_SOURCE_DIR}/$LINKER_SCRIPT_RELPATH" 
+replace_cmake_set $INSTALL_DIR/CMakeLists.txt "MCU_MODEL" "$MCU_MODEL"
+replace_cmake_set $INSTALL_DIR/CMakeLists.txt "MCU_FAMILY" "$MCU_FAMILY"
+replace_cmake_set $INSTALL_DIR/CMakeLists.txt "STARTUP_SCRIPT" "\${CMAKE_CURRENT_SOURCE_DIR}/$STARTUP_SCRIPT_RELPATH"
+replace_cmake_set $INSTALL_DIR/CMakeLists.txt "MCU_LINKER_SCRIPT" "\${CMAKE_CURRENT_SOURCE_DIR}/$LINKER_SCRIPT_RELPATH"
 
 # Modify/remove/add CPU definitions
 replace $INSTALL_DIR/CMakeLists.txt "-mcpu.*" "-mcpu=cortex-$CPU_CORE"
