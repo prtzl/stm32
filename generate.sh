@@ -169,7 +169,7 @@ info "Found project info:"
 print "\tMCU_MODEL: $MCU_MODEL"
 print "\tMCU_FAMILY: $MCU_FAMILY"
 print "\tCPU: $CPU_CORE, FPU: $FPU_TYPE, FPU_MODE: $FPU_MODE"
-if [[ "\t$CPU_CORE" == "m7" ]]; then warn "M7: check if CPU supports double precission float (remove -sp from -mfpu)"; fi
+if [[ "$CPU_CORE" == "m7" ]]; then warn "\tcore $CPU_CORE: check if CPU supports double precission float (remove -sp from -mfpu)"; fi
 print "\tSTARTUP_SCRIPT: $STARTUP_SCRIPT_RELPATH"
 print "\tLINKER_SCRIPT: $LINKER_SCRIPT_RELPATH"
 
