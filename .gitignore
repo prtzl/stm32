@@ -21,6 +21,10 @@
 !docker-compose.yml
 !.dockerignore
 
+# MESON
+!meson.build
+!cross.txte
+
 # EXAMPLE
 !Core
 !Drivers

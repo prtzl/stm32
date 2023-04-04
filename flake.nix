@@ -52,6 +52,7 @@
       devShell = pkgs.mkShellNoCC {
         nativeBuildInputs = (firmware.nativeBuildInputs or [ ]) ++ (firmware.buildInputs or [ ])
           ++ [ pkgs.clang-tools jlink pkgs.stlink pkgs.dos2unix pkgs.glibc_multi pkgs.clang ];
+        LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [ pkgs.llvmPackages_11.llvm ];
       };
     });
 }

@@ -3,6 +3,8 @@
 , gnumake
 , gcc-arm-embedded
 , clang-tools
+, meson
+, ninja
 }:
 
 stdenv.mkDerivation rec {
@@ -10,6 +12,7 @@ stdenv.mkDerivation rec {
   version = "0.0.1";
   src = ./.;
 
+  buildInputs = [ ninja meson ];
   nativeBuildInputs = [ cmake gnumake gcc-arm-embedded ];
 
   dontPatch = true;
