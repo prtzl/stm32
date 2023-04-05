@@ -3,6 +3,7 @@ project('stm32', ['c', 'cpp'])
 srcs = []
 incdirs = []
 c_args = []
+cpp_args = []
 link_args = []
 link_deps = []
 
@@ -12,6 +13,8 @@ startupfile = files(['CubeMX/startup_stm32f407xx.s'])
 
 cpu = host_machine.cpu()
 c_args += '-mcpu=@0@'.format(cpu)
+c_args += '-O3'
+cpp_args += '-O3'
 
 arch = 'armv7e-m'
 
@@ -58,9 +61,9 @@ main = executable(
   'main',
   [srcs, stm32cube_srcs, startupfile],
   name_suffix : 'elf',
-  c_args : [c_args],
-  cpp_args : [c_args, '-std=c++20'],
-  link_args : [link_args, '-Wl,--gc-sections'],
+  c_args : [c_args, '-std=c11'],
+  cpp_args : [c_args, cpp_args, '-std=c++20'],
+  link_args : [link_args, '--specs=nosys.specs'],
   dependencies : link_deps,
   include_directories : [incdirs, stm32cube_incdirs]
   )

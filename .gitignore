@@ -23,7 +23,7 @@
 
 # MESON
 !meson.build
-!cross.txte
+!cross.txt
 
 # EXAMPLE
 !Core
