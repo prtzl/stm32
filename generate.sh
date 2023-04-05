@@ -47,7 +47,7 @@ function check()
 ################################################################################
 
 # AUTO_GIT="y"
-HELP="./generate.sh <g/a> <destination directory>"
+HELP="./generate.sh <destination directory>"
 
 # Check input destination directory validity
 INSTALL_DIR=$1
