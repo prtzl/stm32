@@ -12,7 +12,14 @@ gdb     = 'arm-none-eabi-gdb'
 
 exe_wrapper = 'meson_exe_wrapper.sh'
 
-[build-in options]
+[built-in options]
+c_link_args = [ '-lc',
+                '-lm',
+                '-lnosys',
+                '-lstdc++'
+                ]
+cpp_link_args = c_link_args
+
 c_args      = [
                '-mthumb',                   # define language
                '-fshort-enums',             # otherwise errors at linking...
@@ -22,10 +29,11 @@ c_args      = [
                '-fdata-sections',           # each variable to a seperate section ==> Code-optimization / deletion
               '-Wall',
               '--specs=nano.specs',
-              '-Wl,--gc-sections'
+    '--specs=nosys.specs',
+              '-Wl,--gc-sections',
+              '-nostdlib', '-ffreestanding'
                ]
 
-c_link_args = [ ]
 
 cpp_args = [ '-mthumb',                   # define language
                '-fshort-enums',             # otherwise errors at linking...
@@ -35,9 +43,36 @@ cpp_args = [ '-mthumb',                   # define language
                '-fdata-sections',           # each variable to a seperate section ==> Code-optimization / deletion
               '-Wall',
               '--specs=nano.specs',
-              '-Wl,--gc-sections', '-fno-rtti', '-fno-exceptions', '-fno-threadsafe-statics' ]
+    '--specs=nosys.specs',
+              '-Wl,--gc-sections', '-fno-rtti', '-fno-exceptions', '-fno-threadsafe-statics','-nostdlib', '-ffreestanding' ]
 
-cpp_link_args = c_link_args
+
+
+[properties]
+
+
+asm_flags = [
+    '-mthumb',
+    '-x assembler-with-cpp'
+    ]
+
+exe_linker_flags = [
+    '-mthumb',
+    '--specs=nano.specs',
+    '--specs=nosys.specs',
+    '-mabi=aapcs'
+    ]
+
+module_linker_flags = [
+    '-mthumb',
+    '-mabi=aapcs'
+    ]
+
+shared_linker_flags = [
+    '-mthumb',
+    '-mabi=aapcs'
+    ]
+
 
 [host_machine]
 system     = 'none'
