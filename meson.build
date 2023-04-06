@@ -12,7 +12,7 @@ c_args += '-DUSE_HAL_DRIVER'
 c_args += '-mfpu=fpv4-sp-d16'
 c_args += '-mfloat-abi=hard'
 linkfile = 'CubeMX/STM32F407VGTx_FLASH.ld'
-startupfile = files(['CubeMX/startup_stm32f407xx.s'])
+startupfile = 'CubeMX/startup_stm32f407xx.s'
 
 cpu = host_machine.cpu()
 c_args += '-mcpu=@0@'.format(cpu)
@@ -22,7 +22,7 @@ arch = 'armv7e-m'
 
 # link_deps += meson.get_compiler('c').find_library()
 
-link_args += ['-Wl,-T,@0@/@1@'.format(meson.current_source_dir(), linkfile)]
+link_args += ['-T@0@/@1@'.format(meson.current_source_dir(), linkfile)]
 
 stm32cube_srcs = []
 stm32cube_incdirs = []
@@ -63,7 +63,7 @@ incdirs += include_directories('/nix/store/7026gggbzcvj6bvbdcm68z665ngd3d7k-gcc-
 incdirs += include_directories('/nix/store/7026gggbzcvj6bvbdcm68z665ngd3d7k-gcc-arm-embedded-12.2.rel1/arm-none-eabi/include/newlib-nano', is_system : true)
 
 message('hrenovka')
-message('@0@'.format(meson.get_compiler('c')))
+message('@0@'.format(c_args))
 
 # if meson.get_cross_property('newlib_nano') == true
   # message('newlib_nano added')
@@ -77,13 +77,18 @@ message('@0@'.format(meson.get_compiler('c')))
   # linkDeps +=  meson.get_compiler('c').find_library('/usr/lib/arm-none-eabi/newlib/libnosys')
 # endif
 
+link_args += c_args
+link_args += '-Wl,-Map=main.map'
+
+link_args += ['-mthumb','-fshort-enums','-fmessage-length=0','-fsigned-char','-ffunction-sections','-fdata-sections','-Wall','--specs=nano.specs','-Wl,--gc-sections']
+
 main = executable(
   'main',
   [srcs, stm32cube_srcs, startupfile],
   name_suffix : 'elf',
   c_args : [c_args, '-std=c11'],
   cpp_args : [c_args, cpp_args, '-std=c++20'],
-  link_args : [link_args, c_args, '-Wl,-Map=main.map', '-Wl,--exclude-libs,liblibc.a', '-l:libc_nano.a'],
+  link_args : link_args,
   dependencies : link_deps,
   include_directories : [incdirs, stm32cube_incdirs]
   )

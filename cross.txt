@@ -20,7 +20,7 @@ c_link_args = [ '-lc',
                 ]
 cpp_link_args = c_link_args
 
-c_args      = [
+c_args = [
                '-mthumb',                   # define language
                '-fshort-enums',             # otherwise errors at linking...
                '-fmessage-length=0',        # all error warnings in a single line (default 72)
@@ -29,9 +29,7 @@ c_args      = [
                '-fdata-sections',           # each variable to a seperate section ==> Code-optimization / deletion
               '-Wall',
               '--specs=nano.specs',
-    '--specs=nosys.specs',
               '-Wl,--gc-sections',
-              '-nostdlib', '-ffreestanding'
                ]
 
 
@@ -43,7 +41,6 @@ cpp_args = [ '-mthumb',                   # define language
                '-fdata-sections',           # each variable to a seperate section ==> Code-optimization / deletion
               '-Wall',
               '--specs=nano.specs',
-    '--specs=nosys.specs',
               '-Wl,--gc-sections', '-fno-rtti', '-fno-exceptions', '-fno-threadsafe-statics','-nostdlib', '-ffreestanding' ]
 
 
