@@ -1,14 +1,17 @@
+[constants]
+arch = 'arm-none-eabi'
+
 [binaries]
-c       = 'arm-none-eabi-gcc'
-cpp     = 'arm-none-eabi-g++'
-ld      = 'arm-none-eabi-ld'
-ar      = 'arm-none-eabi-ar'
-as      = 'arm-none-eabi-as'
-size    = 'arm-none-eabi-size'
-objdump = 'arm-none-eabi-objdump'
-objcopy = 'arm-none-eabi-objcopy'
-strip   = 'arm-none-eabi-strip'
-gdb     = 'arm-none-eabi-gdb'
+c       = arch + '-gcc'
+cpp     = arch + '-g++'
+ld      = arch + '-ld'
+ar      = arch + '-ar'
+as      = arch + '-as'
+size    = arch + '-size'
+objdump = arch + '-objdump'
+objcopy = arch + '-objcopy'
+strip   = arch + '-strip'
+gdb     = arch + '-gdb'
 
 exe_wrapper = 'meson_exe_wrapper.sh'
 

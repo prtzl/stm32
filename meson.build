@@ -1,5 +1,7 @@
 project('stm32', ['c', 'cpp'], default_options : ['optimization=g', 'debug=true'])
 
+assert(meson.get_compiler('c').get_id() == 'gcc')
+
 srcs = []
 incdirs = []
 c_args = []
@@ -66,11 +68,14 @@ srcs += ['Project/projectMain.cpp']
 message('hrenovka')
 message('@0@'.format(c_args))
 
+c_args += '-fdiagnostics-color=always'
 link_args += c_args
-link_args += '-Wl,-Map=main.map'
+link_args += '-Wl,-Map=main.map '
+link_args += '-Wl,--print-memory-usage'
 
 link_args += ['-mthumb','-fshort-enums','-fmessage-length=0','-fsigned-char','-ffunction-sections','-fdata-sections','-Wall','--specs=nano.specs','-Wl,--gc-sections']
 
+# Main target
 main = executable(
   'main',
   [srcs, stm32cube_srcs, startupfile],
@@ -79,34 +84,38 @@ main = executable(
   cpp_args : [c_args, cpp_args, '-std=c++20'],
   link_args : link_args,
   dependencies : link_deps,
-  include_directories : [incdirs, stm32cube_incdirs]
-  )
+  include_directories : [incdirs, stm32cube_incdirs])
 
+# Post-build targets
 objcopy  = '@0@'.format(find_program('objcopy').path())
 objdump  = '@0@'.format(find_program('objdump').path())
 size     = '@0@'.format(find_program('size').path())
 
+# binary
 mainbin = custom_target(
-                        'main.bin',
-    output           : ['main.bin'],
-    build_by_default : true,
-    command          : [objcopy, '-O', 'binary', 'main.elf', 'main.bin'],
-    depends          : [main])
+                      'main.bin',
+  output           : ['main.bin'],
+  build_by_default : true,
+  command          : [objcopy, '-O', 'binary', 'main.elf', 'main.bin'],
+  depends          : [main])
 
+# Size output
+# text = all RO segments (.text, .isr_vector, .rodata, .ARM)
+# data = all RW segments (.data)
+# .bss = all runtime RW segemnts (.bss, .heap)
 mainsize = custom_target(
-                          'size',
-        capture          : true,
-        output           : ['main.size'],
-        build_by_default : true,
-        command          : [size, '--format=berkeley', 'main.elf'],
-        depends          : [main])
+                    'size',
+  capture          : false,
+  output           : ['main.size'],
+  build_by_default : true,
+  command          : [size, '--format=berkely', 'main.elf'],
+  depends          : [main])
 
-if meson.get_compiler('c').get_id() == 'gcc'
-  maindump = custom_target(
-                        'dump',
-      capture          : true,
-      output           : 'main.dump',
-      build_by_default : false,
-      command          : [objdump, '-D', '-S', '-t', 'main.elf'],
-      depends          : [main])
-endif
+# objdump
+maindump = custom_target(
+                    'dump',
+  capture          : true,
+  output           : 'main.dump',
+  build_by_default : false,
+  command          : [objdump, '-D', '-S', '-t', 'main.elf'],
+  depends          : [main])
