@@ -2,62 +2,26 @@ project('stm32', ['c', 'cpp'], default_options : ['optimization=g', 'debug=true'
 
 assert(meson.get_compiler('c').get_id() == 'gcc')
 
-## Compiler options
-c_args = []
-c_args += '-mcpu=@0@'.format(host_machine.cpu())
-c_args += '-mfpu=fpv4-sp-d16'
-c_args += '-mfloat-abi=hard'
-c_args += '-DSTM32F407xx'
-c_args += '-DUSE_HAL_DRIVER'
-
-c_args += '-g3'
-c_args += '-ggdb3'
-c_args += '-Wall'
-c_args += '-Wextra'
-c_args += '-Wpedantic'
-c_args += '-Wshadow'
-c_args += '-Wdouble-promotion'
-c_args += '-Wformat=2'
-c_args += '-Wformat-truncation'
-c_args += '-Wundef'
-c_args += '-fno-common'
-c_args += '-Wno-unused-parameter'
-c_args += '-fdiagnostics-color=always'
-
-cpp_args = []
-cpp_args += c_args
-cpp_args += '-Wconversion'
-cpp_args += '-Wno-volatile'
-cpp_args += '-Wold-style-cast'
-cpp_args += '-Wuseless-cast'
-cpp_args += '-Wsuggest-override'
-
-## Linker options
-link_args = []
-link_args += c_args
-link_args += '-Wl,-Map=main.map '
-link_args += '-Wl,--print-memory-usage'
-
-linkfile = 'CubeMX/STM32F407VGTx_FLASH.ld'
-link_args += '-T@0@/@1@'.format(meson.current_source_dir(), linkfile)
-
-if meson.get_compiler('c').version() > '10.3.1'
-  link_args += '-Wl,--no-warn-rwx-segments'
-endif
-
-# For some reason, c_link_args from cross file is not used, why??
-link_args += ['-mthumb', '--specs=nano.specs', '-ffunction-sections', '-fdata-sections', '-Wl,--gc-section']
+## STM32 platform vars
+stm32_family = 'STM32F4xx'
+stm32_model  = 'STM32F407xx'
+stm32_fpu    = 'fpv4-sp-d16'
 
 ## STM32 sources and headers
+# This allows checking if file exists - throws if not
+# I could also implement this where used, but since it throws here, looks better?
+startupfile = files('CubeMX/startup_stm32f407xx.s')[0]
+linkfile = files('CubeMX/STM32F407VGTx_FLASH.ld')[0]
+
 stm32cube_incdirs = []
-stm32cube_incdirs += include_directories('Drivers/CMSIS/Device/ST/STM32F4xx/Include', is_system : true)
-stm32cube_incdirs += include_directories('Drivers/STM32F4xx_HAL_Driver/Inc', is_system : true)
+stm32cube_incdirs += include_directories('Drivers/CMSIS/Device/ST/@0@/Include'.format(stm32_family), is_system : true)
+stm32cube_incdirs += include_directories('Drivers/@0@_HAL_Driver/Inc'.format(stm32_family), is_system : true)
+stm32cube_incdirs += include_directories('Drivers/@0@_HAL_Driver/Inc/Legacy'.format(stm32_family), is_system : true)
 stm32cube_incdirs += include_directories('Drivers/CMSIS/Include', is_system : true)
 stm32cube_incdirs += include_directories('Drivers', is_system : true)
 stm32cube_incdirs += include_directories('Core/Inc', is_system : true)
 
 stm32cube_srcs = []
-startupfile = 'CubeMX/startup_stm32f407xx.s'
 stm32cube_srcs += startupfile
 
 stm32cube_srcs += 'Core/Src/gpio.c'
@@ -88,11 +52,61 @@ srcs = []
 srcs += ['Project/SWO.c']
 srcs += ['Project/projectMain.cpp']
 
+########################### GOIN TO WORK ? ####################################
+
+## Compiler options
+c_args = []
+c_args += '-mcpu=@0@'.format(host_machine.cpu())
+if stm32_fpu != ''
+  c_args += '-mfpu=@0@'.format(stm32_fpu)
+  c_args += '-mfloat-abi=hard'
+else
+  c_args += '-mfloat-abi=soft'
+endif
+c_args += '-D@0@'.format(stm32_model)
+c_args += '-DUSE_HAL_DRIVER'
+
+c_args += '-g3'
+c_args += '-ggdb3'
+c_args += '-Wall'
+c_args += '-Wextra'
+c_args += '-Wpedantic'
+c_args += '-Wshadow'
+c_args += '-Wdouble-promotion'
+c_args += '-Wformat=2'
+c_args += '-Wformat-truncation'
+c_args += '-Wundef'
+c_args += '-fno-common'
+c_args += '-Wno-unused-parameter'
+c_args += '-fdiagnostics-color=always'
+
+cpp_args = []
+cpp_args += c_args
+cpp_args += '-Wconversion'
+cpp_args += '-Wno-volatile'
+cpp_args += '-Wold-style-cast'
+cpp_args += '-Wuseless-cast'
+cpp_args += '-Wsuggest-override'
+
+## Linker options
+link_args = []
+link_args += c_args
+link_args += '-Wl,-Map=main.map '
+link_args += '-Wl,--print-memory-usage'
+link_args += '-T@0@/@1@'.format(meson.current_source_dir(), linkfile)
+
+if meson.get_compiler('c').version() > '10.3.1'
+  link_args += '-Wl,--no-warn-rwx-segments'
+endif
+
+# For some reason, c_link_args from cross file is not used, why??
+link_args += ['-mthumb', '--specs=nano.specs', '-ffunction-sections', '-fdata-sections', '-Wl,--gc-section']
+
 ## Output targets
 # Main target
 main = executable(
   'main',
-  [srcs, stm32cube_srcs, startupfile],
+  [srcs, stm32cube_srcs],
   name_suffix : 'elf',
   c_args : [c_args, '-std=c11'],
   cpp_args : [cpp_args, '-std=c++20'],
