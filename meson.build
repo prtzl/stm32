@@ -2,88 +2,102 @@ project('stm32', ['c', 'cpp'], default_options : ['optimization=g', 'debug=true'
 
 assert(meson.get_compiler('c').get_id() == 'gcc')
 
-srcs = []
-incdirs = []
+## Compiler options
 c_args = []
-cpp_args = []
-link_args = []
-link_deps = []
-
-c_args += '-DSTM32F407xx'
-c_args += '-DUSE_HAL_DRIVER'
+c_args += '-mcpu=@0@'.format(host_machine.cpu())
 c_args += '-mfpu=fpv4-sp-d16'
 c_args += '-mfloat-abi=hard'
-linkfile = 'CubeMX/STM32F407VGTx_FLASH.ld'
-startupfile = 'CubeMX/startup_stm32f407xx.s'
+c_args += '-DSTM32F407xx'
+c_args += '-DUSE_HAL_DRIVER'
 
-cpu = host_machine.cpu()
-c_args += '-mcpu=@0@'.format(cpu)
+c_args += '-g3'
 c_args += '-ggdb3'
+c_args += '-Wall'
+c_args += '-Wextra'
+c_args += '-Wpedantic'
+c_args += '-Wshadow'
+c_args += '-Wdouble-promotion'
+c_args += '-Wformat=2'
+c_args += '-Wformat-truncation'
+c_args += '-Wundef'
+c_args += '-fno-common'
+c_args += '-Wno-unused-parameter'
+c_args += '-fdiagnostics-color=always'
 
-arch = 'armv7e-m'
+cpp_args = []
+cpp_args += c_args
+cpp_args += '-Wconversion'
+cpp_args += '-Wno-volatile'
+cpp_args += '-Wold-style-cast'
+cpp_args += '-Wuseless-cast'
+cpp_args += '-Wsuggest-override'
 
-compiler_version = meson.get_compiler('c').version()
-if compiler_version > '10.3.1'
-  message('New compiler, adding flags')
+## Linker options
+link_args = []
+link_args += c_args
+link_args += '-Wl,-Map=main.map '
+link_args += '-Wl,--print-memory-usage'
+
+linkfile = 'CubeMX/STM32F407VGTx_FLASH.ld'
+link_args += '-T@0@/@1@'.format(meson.current_source_dir(), linkfile)
+
+if meson.get_compiler('c').version() > '10.3.1'
   link_args += '-Wl,--no-warn-rwx-segments'
 endif
 
-link_args += ['-T@0@/@1@'.format(meson.current_source_dir(), linkfile)]
+# For some reason, c_link_args from cross file is not used, why??
+link_args += ['-mthumb', '--specs=nano.specs', '-ffunction-sections', '-fdata-sections', '-Wl,--gc-section']
 
-stm32cube_srcs = []
+## STM32 sources and headers
 stm32cube_incdirs = []
-
 stm32cube_incdirs += include_directories('Drivers/CMSIS/Device/ST/STM32F4xx/Include', is_system : true)
 stm32cube_incdirs += include_directories('Drivers/STM32F4xx_HAL_Driver/Inc', is_system : true)
 stm32cube_incdirs += include_directories('Drivers/CMSIS/Include', is_system : true)
 stm32cube_incdirs += include_directories('Drivers', is_system : true)
 stm32cube_incdirs += include_directories('Core/Inc', is_system : true)
 
-stm32cube_srcs += ['Core/Src/gpio.c']
-stm32cube_srcs += ['Core/Src/main.c']
-stm32cube_srcs += ['Core/Src/stm32f4xx_hal_msp.c']
-stm32cube_srcs += ['Core/Src/stm32f4xx_it.c']
-stm32cube_srcs += ['Core/Src/system_stm32f4xx.c']
-stm32cube_srcs += ['Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c']
-stm32cube_srcs += ['Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c']
-stm32cube_srcs += ['Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c']
-stm32cube_srcs += ['Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c']
-stm32cube_srcs += ['Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c']
-stm32cube_srcs += ['Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c']
-stm32cube_srcs += ['Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c']
-stm32cube_srcs += ['Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.c']
-stm32cube_srcs += ['Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c']
-stm32cube_srcs += ['Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c']
-stm32cube_srcs += ['Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c']
-stm32cube_srcs += ['Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c']
-stm32cube_srcs += ['Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c']
-stm32cube_srcs += ['Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c']
-stm32cube_srcs += ['Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c']
+stm32cube_srcs = []
+startupfile = 'CubeMX/startup_stm32f407xx.s'
+stm32cube_srcs += startupfile
 
+stm32cube_srcs += 'Core/Src/gpio.c'
+stm32cube_srcs += 'Core/Src/main.c'
+stm32cube_srcs += 'Core/Src/stm32f4xx_hal_msp.c'
+stm32cube_srcs += 'Core/Src/stm32f4xx_it.c'
+stm32cube_srcs += 'Core/Src/system_stm32f4xx.c'
+stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c'
+stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c'
+stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c'
+stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c'
+stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c'
+stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c'
+stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c'
+stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.c'
+stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c'
+stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c'
+stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c'
+stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c'
+stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c'
+stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c'
+stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c'
+
+incdirs = []
 incdirs += ['Project']
 
+srcs = []
 srcs += ['Project/SWO.c']
 srcs += ['Project/projectMain.cpp']
 
-message('hrenovka')
-message('@0@'.format(c_args))
-
-c_args += '-fdiagnostics-color=always'
-link_args += c_args
-link_args += '-Wl,-Map=main.map '
-link_args += '-Wl,--print-memory-usage'
-
-link_args += ['-mthumb','-fshort-enums','-fmessage-length=0','-fsigned-char','-ffunction-sections','-fdata-sections','-Wall','--specs=nano.specs','-Wl,--gc-sections']
-
+## Output targets
 # Main target
 main = executable(
   'main',
   [srcs, stm32cube_srcs, startupfile],
   name_suffix : 'elf',
   c_args : [c_args, '-std=c11'],
-  cpp_args : [c_args, cpp_args, '-std=c++20'],
+  cpp_args : [cpp_args, '-std=c++20'],
   link_args : link_args,
-  dependencies : link_deps,
+  dependencies : [],
   include_directories : [incdirs, stm32cube_incdirs])
 
 # Post-build targets

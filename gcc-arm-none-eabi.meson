@@ -13,69 +13,26 @@ objcopy = arch + '-objcopy'
 strip   = arch + '-strip'
 gdb     = arch + '-gdb'
 
-exe_wrapper = 'meson_exe_wrapper.sh'
-
 [built-in options]
-c_link_args = [ '-lc',
-                '-lm',
-                '-lnosys',
-                '-lstdc++'
-                ]
-cpp_link_args = c_link_args
-
 c_args = [
-               '-mthumb',                   # define language
-               '-fshort-enums',             # otherwise errors at linking...
-               '-fmessage-length=0',        # all error warnings in a single line (default 72)
-               '-fsigned-char',             # char is per default unsigned
-               '-ffunction-sections',       # each function to a seperate section ==> Code-optimization / deletion
-               '-fdata-sections',           # each variable to a seperate section ==> Code-optimization / deletion
-              '-Wall',
-              '--specs=nano.specs',
-              '-Wl,--gc-sections',
-               ]
-
-
-cpp_args = [ '-mthumb',                   # define language
-               '-fshort-enums',             # otherwise errors at linking...
-               '-fmessage-length=0',        # all error warnings in a single line (default 72)
-               '-fsigned-char',             # char is per default unsigned
-               '-ffunction-sections',       # each function to a seperate section ==> Code-optimization / deletion
-               '-fdata-sections',           # each variable to a seperate section ==> Code-optimization / deletion
-              '-Wall',
-              '--specs=nano.specs',
-              '-Wl,--gc-sections', '-fno-rtti', '-fno-exceptions', '-fno-threadsafe-statics','-nostdlib', '-ffreestanding' ]
-
-
-
-[properties]
-
-
-asm_flags = [
     '-mthumb',
-    '-x assembler-with-cpp'
-    ]
-
-exe_linker_flags = [
-    '-mthumb',
+    '-fshort-enums',
+    '-fmessage-length=0',
+    '-fsigned-char',
+    '-ffunction-sections',
+    '-fdata-sections',
     '--specs=nano.specs',
-    '--specs=nosys.specs',
-    '-mabi=aapcs'
-    ]
+    '-Wl,--gc-sections']
 
-module_linker_flags = [
-    '-mthumb',
-    '-mabi=aapcs'
-    ]
+cpp_args = c_args + [
+    '-fno-rtti',
+    '-fno-exceptions',
+    '-fno-threadsafe-statics']
 
-shared_linker_flags = [
-    '-mthumb',
-    '-mabi=aapcs'
-    ]
+c_link_args = c_args + [
+    '-lc',
+    '-lm',
+    '-lnosys',
+    '-lstdc++']
 
-
-[host_machine]
-system     = 'none'
-cpu_family = 'arm'
-cpu        = 'cortex-m4'
-endian     = 'little'
+cpp_link_args = c_link_args
