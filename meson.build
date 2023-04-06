@@ -20,7 +20,11 @@ c_args += '-ggdb3'
 
 arch = 'armv7e-m'
 
-# link_deps += meson.get_compiler('c').find_library()
+compiler_version = meson.get_compiler('c').version()
+if compiler_version > '10.3.1'
+  message('New compiler, adding flags')
+  link_args += '-Wl,--no-warn-rwx-segments'
+endif
 
 link_args += ['-T@0@/@1@'.format(meson.current_source_dir(), linkfile)]
 
@@ -59,23 +63,8 @@ incdirs += ['Project']
 srcs += ['Project/SWO.c']
 srcs += ['Project/projectMain.cpp']
 
-incdirs += include_directories('/nix/store/7026gggbzcvj6bvbdcm68z665ngd3d7k-gcc-arm-embedded-12.2.rel1/arm-none-eabi/include/c++/12.2.1', is_system : true)
-incdirs += include_directories('/nix/store/7026gggbzcvj6bvbdcm68z665ngd3d7k-gcc-arm-embedded-12.2.rel1/arm-none-eabi/include/newlib-nano', is_system : true)
-
 message('hrenovka')
 message('@0@'.format(c_args))
-
-# if meson.get_cross_property('newlib_nano') == true
-  # message('newlib_nano added')
-  # linkDeps +=  meson.get_compiler('c').find_library('/usr/lib/arm-none-eabi/newlib/libc_nano')
-  # linkDeps +=  meson.get_compiler('c').find_library('/usr/lib/arm-none-eabi/newlib/librdimon_nano')
-  # linkDeps +=  meson.get_compiler('c').find_library('/usr/lib/arm-none-eabi/newlib/libg_nano')
-  # linkDeps +=  meson.get_compiler('c').find_library('/usr/lib/arm-none-eabi/newlib/libstdc++_nano')
-  # linkDeps +=  meson.get_compiler('c').find_library('/usr/lib/arm-none-eabi/newlib/libsupc++_nano')
-  #
-  # linkDeps +=  meson.get_compiler('c').find_library('/usr/lib/arm-none-eabi/newlib/libm')
-  # linkDeps +=  meson.get_compiler('c').find_library('/usr/lib/arm-none-eabi/newlib/libnosys')
-# endif
 
 link_args += c_args
 link_args += '-Wl,-Map=main.map'
@@ -100,7 +89,6 @@ size     = '@0@'.format(find_program('size').path())
 mainbin = custom_target(
                         'main.bin',
     output           : ['main.bin'],
-    # name_suffix      : 'bin',
     build_by_default : true,
     command          : [objcopy, '-O', 'binary', 'main.elf', 'main.bin'],
     depends          : [main])
