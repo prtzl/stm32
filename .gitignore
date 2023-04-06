@@ -23,7 +23,7 @@
 
 # MESON
 !meson.build
-!cross.txt
+!gcc-arm-none-eabi.meson
 
 # EXAMPLE
 !Core
