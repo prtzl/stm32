@@ -24,6 +24,7 @@
 # MESON
 !meson.build
 !gcc-arm-none-eabi.meson
+!stm32f4.meson
 
 # EXAMPLE
 !Core
