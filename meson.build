@@ -99,9 +99,6 @@ if meson.get_compiler('c').version() > '10.3.1'
   link_args += '-Wl,--no-warn-rwx-segments'
 endif
 
-# For some reason, c_link_args from cross file is not used, why??
-link_args += ['-mthumb', '--specs=nano.specs', '-ffunction-sections', '-fdata-sections', '-Wl,--gc-section']
-
 ## Output targets
 # Main target
 main = executable(
