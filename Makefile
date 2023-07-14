@@ -50,21 +50,10 @@ format-linux: $(addsuffix .format-linux,$(FORMAT_LINUX))
 	$(if $(filter $(PLATFORM),Linux),dos2unix -q $<,)
 
 # Device specific!
-DEVICE ?= STM32F407VG
+DEVICE ?= STM32F767ZI
 
 flash-st: build
 	st-flash --reset write $(FIRMWARE) 0x08000000
-
-$(BUILD_DIR)/jlink-script:
-	touch $@
-	@echo device $(DEVICE) > $@
-	@echo si 1 >> $@
-	@echo speed 4000 >> $@
-	@echo loadfile $(FIRMWARE),0x08000000 >> $@
-	@echo -e "r\ng\nqc" >> $@
-
-flash-jlink: build | $(BUILD_DIR)/jlink-script
-	JLinkExe -commanderScript $(BUILD_DIR)/jlink-script
 
 clean:
 	rm -rf $(BUILD_DIR)

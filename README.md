@@ -3,13 +3,7 @@
 This repository holds all the possible tools and templates for building and developing STM32 projects.  
 Firmware is configured with CMake and can be built in multiple ways.  
 
-I don't expect you to use all of the files found here or all the lines in the configuration files (Makefile, CMakeLists.txt, etc.). Make sure to read them and remove what you don't need.  
-
-I will also try to make this repository as cross platform as possible. Currently I've tested it on Windows 10 and Linux (Fedora 35, Nixos, Ubuntu 20.04). Any problems regarding a specific distribution will be mentioned in the [workflows](#workflow).  
-
-## Example
-
-You can utilize everything in root of the repository. It holds an example project built around `STM32F407VG` on a discovery board. It blinks the onboard blue LED and prints "Hello, world" over SWO.  
+Currently tested on Windows 10 and Linux (Fedora 35, Nixos, Ubuntu 20.04). Any problems regarding a specific distribution will be mentioned in the [workflows](#workflow).  
 
 ## Workflow
 
@@ -19,7 +13,7 @@ There are a few options to build the CMake project. Approaches differ in depende
 
 [Second way](docs/build-container.md) is using a container tool like `docker` or `podman` with or without additional dependencies, like `docker-compose` or `make`.  
 
-[Third way](docs/build-nix.md) is using nix with provided `flake.nix`.  
+~~[Third way](docs/build-nix.md) is using nix with provided `flake.nix`.~~
 
 ## Code style
 

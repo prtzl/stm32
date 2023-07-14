@@ -1,62 +1,35 @@
 // Configure debug launch settings
 {
     "version": "0.2.0",
-    "projectName": "test-f407vg",
+    "projectName": "INSERT_PROJECT_NAME",
     "configurations": [
         {
-            "name": "JLink debug",
+            "name": "STlink launch",
             "cwd": "${workspaceRoot}",
-            "executable": "${workspaceRoot}/build/sample-f407vg.elf",
+            "executable": "${workspaceRoot}/build/INSERT_PROJECT_NAME.elf",
             "request": "launch",
             "type": "cortex-debug",
-            "servertype": "jlink",
-            "device": "STM32F407VG",
+            "servertype": "stutil",
+            "device": "STM32F767ZI",
             "interface": "swd",
-            "runToEntryPoint": "main",
-            "swoConfig":
-            {
-                "enabled": true,
-                "cpuFrequency": 160000000,
-                "swoFrequency": 4000000,
-                "source": "probe",
-                "decoders":
-                [
-                    {
-                        "label": "ITM port 0 output",
-                        "type": "console",
-                        "port": 0,
-                        "showOnStartup": true,
-                        "encoding": "ascii"
-                    }
-                ]
-            }
+            // "runToEntryPoint": true, // TODO: make this work
+            "preLaunchTask": "Build all", // configured in tasks.json
+            "svdFile": "", // Include svd to watch device peripherals
+            "swoConfig": {} // currently (v1.7.0) not supported for stlink (˘･_･˘)
         },
         {
-            "name": "JLink attach",
+            "name": "STlink launch",
             "cwd": "${workspaceRoot}",
-            "executable": "${workspaceRoot}/build/sample-f407vg.elf",
+            "executable": "${workspaceRoot}/build/INSERT_PROJECT_NAME.elf",
             "request": "attach",
             "type": "cortex-debug",
-            "servertype": "jlink",
-            "device": "STM32F407VG",
+            "servertype": "stutil",
+            "device": "STM32F767ZI",
             "interface": "swd",
-            "swoConfig":
-            {
-                "enabled": true,
-                "cpuFrequency": 160000000,
-                "swoFrequency": 4000000,
-                "source": "probe",
-                "decoders":
-                [
-                    {
-                        "label": "ITM port 0 output",
-                        "type": "console",
-                        "port": 0,
-                        "showOnStartup": true,
-                        "encoding": "ascii"
-                    }
-                ]
-            }
-        }
+            // "runToEntryPoint": true, // TODO: make this work
+            "preLaunchTask": "Build all", // configured in tasks.json
+            "svdFile": "", // Include svd to watch device peripherals
+            "swoConfig": {} // currently (v1.7.0) not supported for stlink (˘･_･˘)
+        },
     ]
 }

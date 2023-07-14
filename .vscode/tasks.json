@@ -3,6 +3,22 @@
     "tasks": [
         {
             "label": "build",
+            "group": "build",
+            "type": "process",
+            "command": "make",
+            "args": [
+                "-j8"
+            ]
+        },
+        {
+            "label": "clean",
+            "group": "build",
+            "type": "process",
+            "command": "make clean",
+            "args": []
+        },
+        {
+            "label": "build-linux",
             "type": "shell",
             "problemMatcher": "$gcc",
             "group": {
@@ -12,13 +28,13 @@
             "command": "make -j8"
         },
         {
-            "label": "clean",
+            "label": "clean-linux",
             "type": "shell",
             "group": {
                 "kind": "build",
                 "isDefault": false
             },
             "command": "make clean"
-        }
+        },
     ]
 }

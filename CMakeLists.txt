@@ -18,16 +18,16 @@ endif()
 message("Build type: ${CMAKE_BUILD_TYPE}")
 
 # Set microcontroller information
-set(MCU_FAMILY STM32F4xx)
-set(MCU_MODEL STM32F407xx)
+set(MCU_FAMILY STM32F7xx)
+set(MCU_MODEL STM32F767xx)
 set(CPU_PARAMETERS
-    -mcpu=cortex-m4
+    -mcpu=cortex-m7
     -mthumb
-    -mfpu=fpv4-sp-d16
+    -mfpu=fpv5-d16
     -mfloat-abi=hard)
 
-set(STARTUP_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/CubeMX/startup_stm32f407xx.s)
-set(MCU_LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/CubeMX/STM32F407VGTx_FLASH.ld)
+set(STARTUP_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/CubeMX/startup_stm32f767xx.s)
+set(MCU_LINKER_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/CubeMX/STM32F767ZITX_FLASH.ld)
 
 ###############################################################################
 set(EXECUTABLE ${CMAKE_PROJECT_NAME})
@@ -47,13 +47,25 @@ set(STM32CUBEMX_INCLUDE_DIRECTORIES
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/${MCU_FAMILY}_HAL_Driver/Inc
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/${MCU_FAMILY}_HAL_Driver/Inc/Legacy
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Device/ST/${MCU_FAMILY}/Include
-    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Include)
+    ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/CMSIS/Include
+)
 
 set(PROJECT_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR})
+
+set(MODULES_INCLUDE_DIRECTIORIES
+    # Add git submodule include paths here
+    # ${CMAKE_CURRENT_SOURCE_DIR}/Modules/comms_manager/canal
+)
 
 file(GLOB_RECURSE STM32CUBEMX_SOURCES CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/Core/*.c
     ${CMAKE_CURRENT_SOURCE_DIR}/Drivers/*.c)
+
+set(MODULES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Modules)
+file(GLOB_RECURSE MODULES_SOURCES CONFIGURE_DEPENDS
+    # Add git submodule source files here
+    # ${MODULES_DIR}/Modules/comms_manager/canal/*.cpp
+)
 
 set(PROJECT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Project)
 file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS
@@ -61,7 +73,8 @@ file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS
     ${PROJECT_DIR}/*.c)
 
 add_executable(${EXECUTABLE}
-    ${STM32CUBEMX_SOURCES} 
+    ${STM32CUBEMX_SOURCES}
+    ${MODULES_SOURCES} 
     ${PROJECT_SOURCES}
     ${STARTUP_SCRIPT})
 
@@ -75,6 +88,9 @@ target_include_directories(${EXECUTABLE} SYSTEM PRIVATE
 
 target_include_directories(${EXECUTABLE} PRIVATE
     ${PROJECT_INCLUDE_DIRECTORIES})
+
+target_include_directories(${EXECUTABLE} PRIVATE
+    ${MODULES_INCLUDE_DIRECTIORIES})
 ###############################################################################
 target_compile_options(${EXECUTABLE} PRIVATE
     ${CPU_PARAMETERS}

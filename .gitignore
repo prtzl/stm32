@@ -7,11 +7,6 @@
 !README.md
 !/docs
 
-# NIX
-!*.nix
-!.envrc
-!flake.lock
-
 # TOOLS
 !Makefile
 !CMakeLists.txt
@@ -22,13 +17,10 @@
 !.dockerignore
 
 # EXAMPLE
-!Core
-!Drivers
 !CubeMX
 !Project
-!STM32-project-template.ioc
+!Modules
 !/.vscode
-/.vscode/*
 !/.vscode/tasks.json
 !/.vscode/c_cpp_properties.json
 !/.vscode/launch.json
