@@ -16,9 +16,6 @@ gdb     = arch + '-gdb'
 [built-in options]
 c_args = [
     '-mthumb',
-    '-fshort-enums',
-    '-fmessage-length=0',
-    '-fsigned-char',
     '-ffunction-sections',
     '-fdata-sections',
     '--specs=nano.specs',
@@ -32,7 +29,6 @@ cpp_args = c_args + [
 c_link_args = c_args + [
     '-lc',
     '-lm',
-    '-lnosys',
     '-lstdc++']
 
 cpp_link_args = c_link_args

@@ -2,9 +2,10 @@
 
 # GIT
 !.gitignore
+!VERSION
 
 # Guides
-!README.md
+# !README.md
 !/docs
 
 # NIX
@@ -25,6 +26,7 @@
 !meson.build
 !gcc-arm-none-eabi.meson
 !stm32f4.meson
+!glob.sh
 
 # EXAMPLE
 !Core
