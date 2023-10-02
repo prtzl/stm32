@@ -1,6 +1,4 @@
-project('stm32', ['c', 'cpp'], default_options : ['optimization=g', 'debug=true'])
-
-assert(meson.get_compiler('c').get_id() == 'gcc')
+project('stm32', ['c', 'cpp'], default_options : ['optimization=g', 'debug=true'], version : files('VERSION'))
 
 ## STM32 platform vars
 stm32_family = 'STM32F4xx'
@@ -13,6 +11,7 @@ stm32_fpu    = 'fpv4-sp-d16'
 startupfile = files('CubeMX/startup_stm32f407xx.s')[0]
 linkfile = files('CubeMX/STM32F407VGTx_FLASH.ld')[0]
 
+# Default (usually STM32 core directories)
 stm32cube_incdirs = []
 stm32cube_incdirs += include_directories('Drivers/CMSIS/Device/ST/@0@/Include'.format(stm32_family), is_system : true)
 stm32cube_incdirs += include_directories('Drivers/@0@_HAL_Driver/Inc'.format(stm32_family), is_system : true)
@@ -21,38 +20,21 @@ stm32cube_incdirs += include_directories('Drivers/CMSIS/Include', is_system : tr
 stm32cube_incdirs += include_directories('Drivers', is_system : true)
 stm32cube_incdirs += include_directories('Core/Inc', is_system : true)
 
-stm32cube_srcs = []
-stm32cube_srcs += startupfile
-
-stm32cube_srcs += 'Core/Src/gpio.c'
-stm32cube_srcs += 'Core/Src/main.c'
-stm32cube_srcs += 'Core/Src/stm32f4xx_hal_msp.c'
-stm32cube_srcs += 'Core/Src/stm32f4xx_it.c'
-stm32cube_srcs += 'Core/Src/system_stm32f4xx.c'
-stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c'
-stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c'
-stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c'
-stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c'
-stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_exti.c'
-stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c'
-stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c'
-stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.c'
-stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c'
-stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c'
-stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c'
-stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c'
-stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c'
-stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c'
-stm32cube_srcs += 'Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c'
-
+# Project include directories
 incdirs = []
 incdirs += ['Project']
 
+# Project sources - we'll use glob for our project
 srcs = []
-srcs += ['Project/SWO.c']
-srcs += ['Project/projectMain.cpp']
+srcs += startupfile
+
+# Glob is not evil, just re-invoke meson (or add file to the list, same amount of work to me :P)
+glob = run_command('glob.sh', check : true)
+srcs += glob.stdout().strip().split('\n')
 
 ########################### GOIN TO WORK ? ####################################
+
+assert(meson.get_compiler('c').get_id() == 'gcc')
 
 ## Compiler options
 c_args = []
@@ -66,8 +48,8 @@ endif
 c_args += '-D@0@'.format(stm32_model)
 c_args += '-DUSE_HAL_DRIVER'
 
-c_args += '-g3'
-c_args += '-ggdb3'
+# c_args += '-g3'
+# c_args += '-ggdb'
 c_args += '-Wall'
 c_args += '-Wextra'
 c_args += '-Wpedantic'
@@ -93,6 +75,7 @@ link_args = []
 link_args += c_args
 link_args += '-Wl,-Map=main.map '
 link_args += '-Wl,--print-memory-usage'
+# So, linker wants a full path to the file
 link_args += '-T@0@/@1@'.format(meson.current_source_dir(), linkfile)
 
 if meson.get_compiler('c').version() > '10.3.1'
@@ -103,7 +86,7 @@ endif
 # Main target
 main = executable(
   'main',
-  [srcs, stm32cube_srcs],
+  [srcs],
   name_suffix : 'elf',
   c_args : [c_args, '-std=c11'],
   cpp_args : [cpp_args, '-std=c++20'],
