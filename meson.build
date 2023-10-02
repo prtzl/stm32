@@ -29,8 +29,8 @@ srcs = []
 srcs += startupfile
 
 # Glob is not evil, just re-invoke meson (or add file to the list, same amount of work to me :P)
-glob = run_command('glob.sh', check : true)
-srcs += glob.stdout().strip().split('\n')
+glob = run_command('glob.sh', check : true).stdout().strip().split('\n')
+srcs += glob
 
 ########################### GOIN TO WORK ? ####################################
 
@@ -48,8 +48,10 @@ endif
 c_args += '-D@0@'.format(stm32_model)
 c_args += '-DUSE_HAL_DRIVER'
 
-# c_args += '-g3'
-# c_args += '-ggdb'
+# TODO: if it with debug?
+c_args += '-g3'
+c_args += '-ggdb'
+
 c_args += '-Wall'
 c_args += '-Wextra'
 c_args += '-Wpedantic'
