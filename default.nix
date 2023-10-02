@@ -5,6 +5,7 @@
 , clang-tools
 , meson
 , ninja
+, bash
 }:
 
 stdenv.mkDerivation rec {
@@ -12,10 +13,8 @@ stdenv.mkDerivation rec {
   version = "0.0.1";
   src = ./.;
 
-  buildInputs = [ ninja meson ];
-  nativeBuildInputs = [ cmake gnumake gcc-arm-embedded ];
+  buildInputs = [ ninja meson gcc-arm-embedded ];
 
-  dontPatch = true;
   dontFixup = true;
   dontStrip = true;
   dontPatchELF = true;
@@ -27,6 +26,17 @@ stdenv.mkDerivation rec {
     "-DCMAKE_BUILD_TYPE=Debug"
     "-DDUMP_ASM=OFF"
   ];
+
+  mesonBuildType = "custom";
+  mesonFlags = [
+    "--cross-file=gcc-arm-none-eabi.meson"
+    "--cross-file=stm32f4.meson"
+  ];
+
+  patchPhase = ''
+    substituteInPlace glob.sh \
+      --replace '/usr/bin/env bash' ${bash}/bin/bash
+  '';
 
   installPhase = ''
     mkdir -p $out/bin
