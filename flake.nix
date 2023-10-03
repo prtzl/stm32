@@ -62,7 +62,7 @@
       };
 
       devShell = pkgs.mkShellNoCC {
-        nativeBuildInputs = (firmware.nativeBuildInputs or [ ]) ++ (firmware.buildInputs or [ ])
+        nativeBuildInputs = (firmware.debug.buildInputs or [ ])
           ++ [ pkgs.clang-tools jlink pkgs.stlink pkgs.dos2unix pkgs.glibc_multi pkgs.clang ];
       };
     });
