@@ -98,7 +98,8 @@ endif
 
 ## Output targets
 
-pname = meson.project_name()
+# This is also how NIX names the derivation, aka, firmware
+pname = meson.project_name() + '-' + meson.project_version()
 pexe = pname + '.elf'
 pbin = pname + '.bin'
 phex = pname + '.hex'
