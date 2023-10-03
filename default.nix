@@ -13,7 +13,7 @@ assert buildType == "debug" || buildType == "release";
 
 stdenv.mkDerivation rec {
   pname = "firmware";
-  version = "0.0.1";
+  version = "${builtins.readFile ./VERSION}+";
   src = ./.;
 
   buildInputs = [ ninja meson gcc-arm-embedded ];
@@ -30,7 +30,8 @@ stdenv.mkDerivation rec {
     "-DDUMP_ASM=OFF"
   ];
 
-  mesonBuildType = "${buildType}";
+  buildtype = buildType;
+  mesonBuildType = "${buildtype}";
   mesonFlags = [
     "--cross-file=gcc-arm-none-eabi.meson"
     "--cross-file=stm32f4.meson"
