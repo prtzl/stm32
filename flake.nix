@@ -16,42 +16,49 @@
         meta.license = "";
       });
 
-      firmware = pkgs.callPackage ./default.nix { };
+      firmware.base = { buildType }: pkgs.callPackage ./default.nix { inherit buildType; };
+      firmware.debug = firmware.base { buildType = "debug"; };
+      firmware.release = firmware.base { buildType = "release"; };
 
-      flash-stlink = pkgs.writeShellApplication {
-        name = "flash-stlink";
-        text = "st-flash --reset write ${firmware}/bin/${firmware.name}.bin 0x08000000";
+      flash-stlink.base = fw: pkgs.writeShellApplication {
+        name = "flash-stlink ${fw.buildType}";
+        text = "st-flash --reset write ${fw}/bin/${fw.name}.bin 0x08000000";
         runtimeInputs = [ pkgs.stlink ];
       };
+      flash-stlink.debug = flash-stlink.base firmware.debug;
+      flash-stlink.release = flash-stlink.base firmware.release;
 
-      jlink-script = pkgs.writeTextFile {
-        name = "jlink-script";
+      jlink-script.base = fw: pkgs.writeTextFile {
+        name = "jlink-script ${fw}";
         text = ''
-          device ${firmware.device}
+          device ${fw.device}
           si 1
           speed 4000
-          loadfile ${firmware}/bin/${firmware.name}.bin,0x08000000
+          loadfile ${fw}/bin/${fw.name}.bin,0x08000000
           r
           g
           qc
         '';
       };
 
-      flash-jlink = pkgs.writeShellApplication {
+      flash-jlink.base = fw: pkgs.writeShellApplication {
         name = "flash-jlink";
-        text = "JLinkExe -commanderscript ${jlink-script}";
+        text = "JLinkExe -commanderscript ${jlink-script.base fw}";
         runtimeInputs = [ jlink ];
       };
+      flash-jlink.debug = flash-jlink.base firmware.debug;
+      flash-jlink.release = flash-jlink.base firmware.release;
     in
     {
       packages = {
         inherit firmware;
-        default = firmware;
+        dd = jlink-script.base firmware.debug;
+        default = firmware.debug;
       };
 
       apps = {
         inherit flash-jlink flash-stlink;
-        default = flash-jlink;
+        default = flash-jlink.debug;
       };
 
       devShell = pkgs.mkShellNoCC {

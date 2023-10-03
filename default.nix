@@ -6,7 +6,10 @@
 , meson
 , ninja
 , bash
+, buildType ? "debug"
 }:
+
+assert buildType == "debug" || buildType == "release";
 
 stdenv.mkDerivation rec {
   pname = "firmware";
@@ -27,7 +30,7 @@ stdenv.mkDerivation rec {
     "-DDUMP_ASM=OFF"
   ];
 
-  mesonBuildType = "custom";
+  mesonBuildType = "${buildType}";
   mesonFlags = [
     "--cross-file=gcc-arm-none-eabi.meson"
     "--cross-file=stm32f4.meson"
