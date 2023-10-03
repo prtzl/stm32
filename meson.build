@@ -1,4 +1,5 @@
-project('stm32', ['c', 'cpp'], default_options : ['optimization=g', 'debug=true'], version : files('VERSION'))
+project('firmware', ['c', 'cpp'], default_options : ['optimization=g', 'debug=true'], version : files('VERSION'))
+
 
 ## STM32 platform vars
 stm32_family = 'STM32F4xx'
@@ -85,15 +86,23 @@ if meson.get_compiler('c').version() > '10.3.1'
 endif
 
 ## Output targets
+
+pname = meson.project_name()
+pexe = pname + '.elf'
+pbin = pname + '.bin'
+phex = pname + '.hex'
+psize = pname + '.size'
+pdump = pname + '.s'
+
 # Main target
 main = executable(
-  'main',
-  [srcs],
-  name_suffix : 'elf',
-  c_args : [c_args, '-std=c11'],
-  cpp_args : [cpp_args, '-std=c++20'],
-  link_args : link_args,
-  dependencies : [],
+                        pname,
+                        [srcs],
+                        name_suffix : 'elf',
+  c_args              : [c_args, '-std=c11'],
+  cpp_args            : [cpp_args, '-std=c++20'],
+  link_args           : link_args,
+  dependencies        : [],
   include_directories : [incdirs, stm32cube_incdirs])
 
 # Post-build targets
@@ -103,10 +112,10 @@ size     = '@0@'.format(find_program('size').path())
 
 # binary
 mainbin = custom_target(
-                      'main.bin',
-  output           : ['main.bin'],
+                     pbin,
+  output           : [pbin],
   build_by_default : true,
-  command          : [objcopy, '-O', 'binary', 'main.elf', 'main.bin'],
+  command          : [objcopy, '-O', 'binary', pexe, pbin],
   depends          : [main])
 
 # Size output
@@ -116,16 +125,16 @@ mainbin = custom_target(
 mainsize = custom_target(
                     'size',
   capture          : false,
-  output           : ['main.size'],
+  output           : [psize],
   build_by_default : true,
-  command          : [size, '--format=berkely', 'main.elf'],
+  command          : [size, '--format=berkely', pexe],
   depends          : [main])
 
 # objdump
 maindump = custom_target(
                     'dump',
   capture          : true,
-  output           : 'main.dump',
+  output           : pdump,
   build_by_default : false,
-  command          : [objdump, '-D', '-S', '-t', 'main.elf'],
+  command          : [objdump, '-D', '-S', '-t', pexe],
   depends          : [main])
