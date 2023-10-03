@@ -1,5 +1,4 @@
-project('firmware', ['c', 'cpp'], default_options : ['optimization=g', 'debug=true'], version : files('VERSION'))
-
+project('firmware', ['c', 'cpp'], default_options : [ 'buildtype=debug' ], version : files('VERSION'))
 
 ## STM32 platform vars
 stm32_family = 'STM32F4xx'
@@ -38,6 +37,7 @@ srcs += glob
 assert(meson.get_compiler('c').get_id() == 'gcc')
 
 ## Compiler options
+# CPU
 c_args = []
 c_args += '-mcpu=@0@'.format(host_machine.cpu())
 if stm32_fpu != ''
@@ -46,12 +46,23 @@ if stm32_fpu != ''
 else
   c_args += '-mfloat-abi=soft'
 endif
+
+# Defines
 c_args += '-D@0@'.format(stm32_model)
 c_args += '-DUSE_HAL_DRIVER'
 
-# TODO: if it with debug?
-c_args += '-g3'
-c_args += '-ggdb'
+# Build optimization
+build_type = get_option('buildtype')
+# Meson will still place -O0 and -g with debug, this overrides
+if build_type == 'debug'
+  c_args += '-Og'
+  c_args += '-g3'
+  c_args += '-ggdb'
+# Meson will still place -O3 , this overrides
+elif build_type == 'release'
+  c_args += '-Og'
+  c_args += '-g0'
+endif
 
 c_args += '-Wall'
 c_args += '-Wextra'
