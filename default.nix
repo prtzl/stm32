@@ -7,13 +7,14 @@
 , ninja
 , bash
 , buildType ? "debug"
+, lib
 }:
 
 assert buildType == "debug" || buildType == "release";
 
 stdenv.mkDerivation rec {
   pname = "firmware";
-  version = "${builtins.readFile ./VERSION}+";
+  version = lib.fileContents ./VERSION;
   src = ./.;
 
   buildInputs = [ ninja meson gcc-arm-embedded ];
@@ -36,6 +37,8 @@ stdenv.mkDerivation rec {
     "--cross-file=gcc-arm-none-eabi.meson"
     "--cross-file=stm32f4.meson"
   ];
+
+  binary = "${pname}-${version}.bin";
 
   patchPhase = ''
     substituteInPlace glob.sh \

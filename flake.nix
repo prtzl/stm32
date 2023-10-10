@@ -22,7 +22,7 @@
 
       flash-stlink.base = fw: pkgs.writeShellApplication {
         name = "flash-stlink ${fw.buildType}";
-        text = "st-flash --reset write ${fw}/bin/${fw.pname}-${fw.version}.bin 0x08000000";
+        text = "st-flash --reset write ${fw}/bin/${fw.binary}.bin 0x08000000";
         runtimeInputs = [ pkgs.stlink ];
       };
       flash-stlink.debug = flash-stlink.base firmware.debug;
@@ -34,7 +34,7 @@
           device ${fw.device}
           si 1
           speed 4000
-          loadfile ${fw}/bin/${fw.pname}-${fw.version}.bin,0x08000000
+          loadfile ${fw}/bin/${fw.binary},0x08000000
           r
           g
           qc
@@ -52,7 +52,6 @@
     {
       packages = {
         inherit firmware;
-        dd = jlink-script firmware.debug;
         default = firmware.debug;
       };
 
