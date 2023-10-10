@@ -16,9 +16,9 @@
         meta.license = "";
       });
 
-      firmware.base = { buildType }: pkgs.callPackage ./default.nix { inherit buildType; };
-      firmware.debug = firmware.base { buildType = "debug"; };
-      firmware.release = firmware.base { buildType = "release"; };
+      firmware.base = { buildtype }: pkgs.callPackage ./default.nix { inherit buildtype; };
+      firmware.debug = firmware.base { buildtype = "Debug"; };
+      firmware.release = firmware.base { buildtype = "Release"; };
 
       flash-stlink.base = fw: pkgs.writeShellApplication {
         name = "flash-stlink ${fw.buildType}";

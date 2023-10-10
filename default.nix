@@ -6,45 +6,48 @@
 , meson
 , ninja
 , bash
-, buildType ? "debug"
+, buildtype ? "Debug"
 , lib
 }:
 
-assert buildType == "debug" || buildType == "release";
+assert buildtype == "Debug" || buildtype == "Release";
 
 stdenv.mkDerivation rec {
   pname = "firmware";
   version = lib.fileContents ./VERSION;
   src = ./.;
 
-  buildInputs = [ ninja meson gcc-arm-embedded ];
+  # order of ninja+meson nad cmake+gnumake will impact which generator is chosen
+  buildInputs = [ gcc-arm-embedded ninja meson cmake gnumake ];
 
-  dontFixup = true;
+  dontFixup = true; # if you use fixupPhase (do something after build), remove this
   dontStrip = true;
   dontPatchELF = true;
 
+  # Firmware/device info
   device = "STM32F407VG";
+  binary = "${pname}-${version}.bin";
 
+  # cmake
   cmakeFlags = [
     "-DPROJECT_NAME=${pname}"
-    "-DCMAKE_BUILD_TYPE=Debug"
+    "-DCMAKE_BUILD_TYPE=${buildtype}"
     "-DDUMP_ASM=OFF"
   ];
 
-  buildtype = buildType;
-  mesonBuildType = "${buildtype}";
+  # meson
+  mesonBuildType = "${lib.strings.toLower buildtype}";
   mesonFlags = [
     "--cross-file=gcc-arm-none-eabi.meson"
     "--cross-file=stm32f4.meson"
   ];
-
-  binary = "${pname}-${version}.bin";
 
   patchPhase = ''
     substituteInPlace glob.sh \
       --replace '/usr/bin/env bash' ${bash}/bin/bash
   '';
 
+  # "save" outputs
   installPhase = ''
     mkdir -p $out/bin
     cp *.bin *.elf *.s $out/bin
