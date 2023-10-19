@@ -16,17 +16,23 @@
         meta.license = "";
       });
 
-      firmware.base = { buildtype }: pkgs.callPackage ./default.nix { inherit buildtype; };
-      firmware.debug = firmware.base { buildtype = "Debug"; };
-      firmware.release = firmware.base { buildtype = "Release"; };
+      meson = pkgs.writeShellApplication {
+        name = "meson";
+        text = ''
+          meson setup --cross-file=./gcc-arm-none-eabi.meson --cross-file=./stm32f4.meson build
+        '';
+        runtimeInputs = with pkgs; [ pkgs.meson pkgs.ninja ];
+      };
 
-      flash-stlink.base = fw: pkgs.writeShellApplication {
-        name = "flash-stlink ${fw.buildType}";
+      mkFirmware = { buildtype }: pkgs.callPackage ./default.nix { inherit buildtype; };
+      firmware.debug = mkFirmware { buildtype = "Debug"; };
+      firmware.release = mkFirmware { buildtype = "Release"; };
+
+      mkFlashStlink = fw: pkgs.writeShellApplication {
+        name = "flash-stlink-${fw.buildtype}";
         text = "st-flash --reset write ${fw}/bin/${fw.binary}.bin 0x08000000";
         runtimeInputs = [ pkgs.stlink ];
       };
-      flash-stlink.debug = flash-stlink.base firmware.debug;
-      flash-stlink.release = flash-stlink.base firmware.release;
 
       jlink-script = fw: pkgs.writeTextFile {
         name = "jlink-script-${fw.buildtype}";
@@ -41,23 +47,26 @@
         '';
       };
 
-      flash-jlink.base = fw: pkgs.writeShellApplication {
-        name = "flash-jlink";
+      mkFlashJlink = fw: pkgs.writeShellApplication {
+        name = "flash-jlink-${fw.buildtype}";
         text = "JLinkExe -commanderscript ${jlink-script fw}";
         runtimeInputs = [ jlink ];
       };
-      flash-jlink.debug = flash-jlink.base firmware.debug;
-      flash-jlink.release = flash-jlink.base firmware.release;
+
+      mkProject = fw: mkFlash:  pkgs.symlinkJoin {
+        name = "project-output";
+        paths = [ fw (mkFlash fw) ];
+        meta.mainProgram = "${(mkFlash fw).name}";
+      };
     in
     {
-      packages = {
-        inherit firmware;
-        default = firmware.debug;
-      };
-
-      apps = {
-        inherit flash-jlink flash-stlink;
-        default = flash-jlink.debug;
+      packages = rec {
+        inherit meson;
+        default = debug;
+        debug = mkProject firmware.debug mkFlashJlink;
+        release = mkProject firmware.release mkFlashJlink;
+        debugst = mkProject firmware.debug mkFlashStlink;
+        releasest = mkProject firmware.release mkFlashStlink;
       };
 
       devShell = pkgs.mkShellNoCC {
