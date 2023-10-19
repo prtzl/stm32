@@ -13,7 +13,9 @@
 assert buildtype == "Debug" || buildtype == "Release";
 
 stdenv.mkDerivation rec {
-  pname = "firmware";
+  inherit buildtype;
+
+  pname = "firmware-${buildtype}";
   version = lib.fileContents ./VERSION;
   src = ./.;
 
