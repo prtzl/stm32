@@ -3,7 +3,7 @@
 if [[ -f .git || -d .git ]]; then
     files=$(git ls-files | grep -E '\.(c|cpp)$')
 else
-    files=$(find . -name '*.c' ! -path '*/build/*' -or -name '*.cpp' ! -path '*/build/*')
+    files=$(find . -type f -not \( -path '*/build/*' -prune \) -name '*.c' -or -name '*.cpp')
 fi
 res=$?
 
