@@ -24,6 +24,14 @@
         runtimeInputs = with pkgs; [ pkgs.meson pkgs.ninja ];
       };
 
+      cmake = pkgs.writeShellApplication {
+        name = "cmake";
+        text = ''
+          cmake -Bbuild -DPROJECT_NAME="${(firmware.debug).pname}" -DCMAKE_BUILD_TYPE="${(firmware.debug).buildtype}"
+        '';
+        runtimeInputs = with pkgs; [ pkgs.meson pkgs.ninja ];
+      };
+
       mkFirmware = { buildtype }: pkgs.callPackage ./default.nix { inherit buildtype; };
       firmware.debug = mkFirmware { buildtype = "Debug"; };
       firmware.release = mkFirmware { buildtype = "Release"; };
@@ -61,7 +69,7 @@
     in
     {
       packages = rec {
-        inherit meson;
+        inherit meson cmake;
         default = debug;
         debug = mkProject firmware.debug mkFlashJlink;
         release = mkProject firmware.release mkFlashJlink;
