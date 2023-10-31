@@ -16,21 +16,19 @@
         meta.license = "";
       });
 
-      meson = pkgs.writeShellApplication {
-        name = "meson";
-        text = ''
-          meson setup --cross-file=./gcc-arm-none-eabi.meson --cross-file=./stm32f4.meson build
-        '';
-        runtimeInputs = with pkgs; [ pkgs.meson pkgs.ninja ];
-      };
+      meson = pkgs.writeShellScriptBin "meson" ''
+        export PATH=${pkgs.meson}:$PATH
+        export PATH=${pkgs.ninja}:$PATH
+        export PATH=${pkgs.gcc-arm-embedded}:$PATH
+        meson setup --cross-file=./gcc-arm-none-eabi.meson --cross-file=./stm32f4.meson build
+      '';
 
-      cmake = pkgs.writeShellApplication {
-        name = "cmake";
-        text = ''
-          cmake -Bbuild -DPROJECT_NAME="${(firmware.debug).pname}" -DCMAKE_BUILD_TYPE="${(firmware.debug).buildtype}"
-        '';
-        runtimeInputs = with pkgs; [ pkgs.meson pkgs.ninja ];
-      };
+      cmake = pkgs.writeShellScriptBin "cmake" ''
+        export PATH=${pkgs.cmake}:$PATH
+        export PATH=${pkgs.gnumake}:$PATH
+        export PATH=${pkgs.gcc-arm-embedded}:$PATH
+        cmake -Bbuild -DPROJECT_NAME="${(firmware.debug).pname}" -DCMAKE_BUILD_TYPE="${(firmware.debug).buildtype}"
+      '';
 
       mkFirmware = { buildtype }: pkgs.callPackage ./default.nix { inherit buildtype; };
       firmware.debug = mkFirmware { buildtype = "Debug"; };
@@ -61,7 +59,7 @@
         runtimeInputs = [ jlink ];
       };
 
-      mkProject = fw: mkFlash:  pkgs.symlinkJoin {
+      mkProject = fw: mkFlash: pkgs.symlinkJoin {
         name = "project-output";
         paths = [ fw (mkFlash fw) ];
         meta.mainProgram = "${(mkFlash fw).name}";
