@@ -16,19 +16,19 @@
         meta.license = "";
       });
 
+      shellExports = ''
+        string=${(builtins.concatStringsSep "/bin:" firmware.debug.buildInputs) + "/bin"}
+        export PATH=''${string}:$PATH
+        buildir=''${1:-build}
+      '';
+
       meson = pkgs.writeShellScriptBin "meson" ''
-        export PATH=${pkgs.meson}:$PATH
-        export PATH=${pkgs.ninja}:$PATH
-        export PATH=${pkgs.gcc-arm-embedded}:$PATH
-        buildir=''${1:=build}
-        meson setup --cross-file=./gcc-arm-none-eabi.meson --cross-file=./stm32f4.meson $buildir
+        ${shellExports}
+        meson setup --cross-file=./gcc-arm-none-eabi.meson --cross-file=./stm32f4.meson "$buildir"
       '';
 
       cmake = pkgs.writeShellScriptBin "cmake" ''
-        export PATH=${pkgs.cmake}:$PATH
-        export PATH=${pkgs.gnumake}:$PATH
-        export PATH=${pkgs.gcc-arm-embedded}:$PATH
-        buildir=''${1:=build}
+        ${shellExports}
         cmake -B$buildir -DPROJECT_NAME="${(firmware.debug).pname}" -DCMAKE_BUILD_TYPE="${(firmware.debug).buildtype}"
       '';
 
