@@ -2,7 +2,6 @@
 , cmake
 , gnumake
 , gcc-arm-embedded
-, clang-tools
 , meson
 , ninja
 , bash
@@ -15,7 +14,7 @@ assert buildtype == "debug" || buildtype == "release";
 stdenv.mkDerivation rec {
   inherit buildtype;
 
-  pname = "firmware-${buildtype}";
+  pname = "firmware";
   version = lib.fileContents ./VERSION;
   src = ./.;
 
@@ -28,11 +27,11 @@ stdenv.mkDerivation rec {
 
   # Firmware/device info
   device = "STM32F407VG";
-  binary = "${pname}-${version}.bin";
+  binary = "${pname}-${version}-${buildtype}.bin";
 
   # cmake
   cmakeFlags = [
-    "-DPROJECT_NAME=${pname}"
+    "-DPROJECT_VERSION=${version}"
     "-DCMAKE_BUILD_TYPE=${buildtype}"
     "-DDUMP_ASM=OFF"
   ];
@@ -42,6 +41,7 @@ stdenv.mkDerivation rec {
   mesonFlags = [
     "--cross-file=gcc-arm-none-eabi.meson"
     "--cross-file=stm32f4.meson"
+    "--buildtype=${buildtype}"
   ];
 
   patchPhase = ''

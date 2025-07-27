@@ -1,4 +1,4 @@
-project('firmware', ['c', 'cpp'], default_options : [ 'buildtype=debug' ], version : files('VERSION'))
+project('firmware', ['c', 'cpp'], version : files('VERSION'), meson_version: '>=1.4.0')
 
 ## STM32 platform vars
 stm32_family = 'STM32F4xx'
@@ -90,7 +90,8 @@ link_args += c_args
 link_args += '-Wl,-Map=main.map '
 link_args += '-Wl,--print-memory-usage'
 # So, linker wants a full path to the file
-link_args += '-T@0@/@1@'.format(meson.current_source_dir(), linkfile)
+linkfilepath = linkfile.full_path()
+link_args += '-T' + linkfilepath
 
 if meson.get_compiler('c').version() > '10.3.1'
   link_args += '-Wl,--no-warn-rwx-segments'
@@ -99,7 +100,7 @@ endif
 ## Output targets
 
 # This is also how NIX names the derivation, aka, firmware
-pname = meson.project_name() + '-' + meson.project_version()
+pname = meson.project_name() + '-' + get_option('buildtype') + '-' + meson.project_version()
 pexe = pname + '.elf'
 pbin = pname + '.bin'
 phex = pname + '.hex'
@@ -118,9 +119,9 @@ main = executable(
   include_directories : [incdirs, stm32cube_incdirs])
 
 # Post-build targets
-objcopy  = '@0@'.format(find_program('objcopy').path())
-objdump  = '@0@'.format(find_program('objdump').path())
-size     = '@0@'.format(find_program('size').path())
+objcopy  = find_program('objcopy').full_path()
+objdump  = find_program('objdump').full_path()
+size     = find_program('size').full_path()
 
 # binary
 mainbin = custom_target(
@@ -128,6 +129,14 @@ mainbin = custom_target(
   output           : [pbin],
   build_by_default : true,
   command          : [objcopy, '-O', 'binary', pexe, pbin],
+  depends          : [main])
+
+# hex
+mainbin = custom_target(
+                     phex,
+  output           : [phex],
+  build_by_default : true,
+  command          : [objcopy, '-O', 'ihex', pexe, phex],
   depends          : [main])
 
 # Size output

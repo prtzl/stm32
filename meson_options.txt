@@ -1,0 +1,1 @@
+option('project_name', type: 'string', value: 'firmware', description: 'Project name')
