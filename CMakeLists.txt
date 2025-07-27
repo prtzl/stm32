@@ -13,7 +13,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Set debug mode as default
 if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
-    set(CMAKE_BUILD_TYPE Debug)
+    set(CMAKE_BUILD_TYPE debug)
 endif()
 message("Build type: ${CMAKE_BUILD_TYPE}")
 
@@ -66,7 +66,7 @@ add_executable(${EXECUTABLE}
     ${STARTUP_SCRIPT})
 
 target_compile_definitions(${EXECUTABLE} PRIVATE
-    #$<$<CONFIG:Debug>:DEBUG>
+    #$<$<CONFIG:debug>:DEBUG>
     ${MCU_MODEL}
     USE_HAL_DRIVER)
 
@@ -93,8 +93,8 @@ target_compile_options(${EXECUTABLE} PRIVATE
         -Wold-style-cast
         -Wuseless-cast
         -Wsuggest-override>
-    $<$<CONFIG:Debug>:-Og -g3 -ggdb>
-    $<$<CONFIG:Release>:-Og -g0>)
+    $<$<CONFIG:debug>:-Og -g3 -ggdb>
+    $<$<CONFIG:release>:-Og -g0>)
 
 target_link_options(${EXECUTABLE} PRIVATE
     -T${MCU_LINKER_SCRIPT}

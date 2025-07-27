@@ -33,8 +33,8 @@
       '';
 
       mkFirmware = { buildtype }: pkgs.callPackage ./default.nix { inherit buildtype; };
-      firmware.debug = mkFirmware { buildtype = "Debug"; };
-      firmware.release = mkFirmware { buildtype = "Release"; };
+      firmware.debug = mkFirmware { buildtype = "debug"; };
+      firmware.release = mkFirmware { buildtype = "release"; };
 
       mkFlashStlink = fw: pkgs.writeShellApplication {
         name = "flash-stlink-${fw.buildtype}";

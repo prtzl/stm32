@@ -6,11 +6,11 @@
 , meson
 , ninja
 , bash
-, buildtype ? "Debug"
+, buildtype ? "debug"
 , lib
 }:
 
-assert buildtype == "Debug" || buildtype == "Release";
+assert buildtype == "debug" || buildtype == "release";
 
 stdenv.mkDerivation rec {
   inherit buildtype;

@@ -4,7 +4,7 @@
 PROJECT_NAME ?= firmware
 BUILD_DIR ?= build
 FIRMWARE := $(BUILD_DIR)/$(PROJECT_NAME).bin
-BUILD_TYPE ?= Debug
+BUILD_TYPE ?= debug
 PLATFORM = $(if $(OS),$(OS),$(shell uname -s))
 
 ifeq ($(PLATFORM),Windows_NT)
