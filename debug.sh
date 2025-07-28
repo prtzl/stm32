@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+exe=$1 
+if [ -n "$exe" ]; then
+    echo "Provide executable path to .elf"
+    exit 1
+fi
+
 JLinkGDBServerCLExe \
   -device STM32F407VG \
   -if SWD \
@@ -15,7 +21,7 @@ trap 'kill $JLINK_PID' EXIT
 sleep 1
 
 # Start GDB interactively and run commands
-arm-none-eabi-gdb ./build/firmware-debug-v1.0.elf \
+arm-none-eabi-gdb $exe \
   -ex "layout next" \
   -ex "layout next" \
   -ex "target remote localhost:2331" \

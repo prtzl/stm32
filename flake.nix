@@ -79,6 +79,38 @@
             paths = [ fw (mkFlash fw) ];
             meta.mainProgram = "${(mkFlash fw).name}";
           };
+
+        debug-jlink = pkgs.writeShellScriptBin "debug" ''
+          ${shellExports}
+          exe=${firmware.debug}/bin/${firmware.debug.executable}
+          if [ -z "$exe" ]; then
+              echo "Provide executable path to .elf"
+              exit 1
+          fi
+
+          JLinkGDBServerCLExe \
+            -device STM32F407VG \
+            -if SWD \
+            -speed 4000 \
+            -port 2331 > jlink.log 2>&1 &
+
+          JLINK_PID=$!
+
+          # Kill J-Link server when script exits
+          trap 'kill $JLINK_PID' EXIT
+
+          # Give the server a moment to start
+          sleep 1
+
+          # Start GDB interactively and run commands
+          arm-none-eabi-gdb $exe \
+            -ex "layout next" \
+            -ex "layout next" \
+            -ex "target remote localhost:2331" \
+            -ex "load" \
+            -ex "break main" \
+            -ex "continue"
+        '';
       in {
         packages = rec {
           inherit meson cmake;
@@ -87,6 +119,11 @@
           release = mkProject firmware.release mkFlashJlink;
           debugst = mkProject firmware.debug mkFlashStlink;
           releasest = mkProject firmware.release mkFlashStlink;
+          debugger = pkgs.symlinkJoin {
+            name = "debug";
+            paths = [ debug-jlink firmware.debug ];
+            meta.mainProgram = "${debug-jlink.name}";
+          };
         };
 
         devShell = pkgs.mkShellNoCC {
