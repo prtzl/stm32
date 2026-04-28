@@ -88,46 +88,67 @@
               meta.mainProgram = "${(mkFlash fw).name}";
             };
 
-          debug-jlink = pkgs.writeShellApplication {
-            name = "debug";
-            runtimeInputs = firmware.debug.buildInputs or [ ];
-            text = ''
-              exe=''${1:-${firmware.debug}/bin/${firmware.debug.executable}}
-              if [ -z "$exe" ]; then
-                  echo "Provide executable path to .elf"
-                  exit 1
-              fi
+          makeDebugger =
+            variant:
+            assert variant == "jlink" || variant == "stlink";
+            pkgs.writeShellApplication {
+              name = "debugger-${variant}";
+              runtimeInputs = with pkgs; firmware.debug.buildInputs or [ ] ++ [ stlink ];
+              text = ''
+                set -x
 
-              setsid JLinkGDBServerCLExe \
-                -device STM32F407VG \
-                -if SWD \
-                -speed ${jlinkSpeedKhz} \
-                -port 2331 > jlink.log 2>&1 &
+                exe=''${1:-${firmware.debug}/bin/${firmware.debug.executable}}
+                if [ -z "$exe" ]; then
+                    echo "Provide executable path to .elf"
+                    exit 1
+                fi
 
-              JLINK_PID=$!
+                debugger="${variant}"
+                if [[ "$debugger" == "jlink" ]]; then
+                  port=2331
+                  setsid JLinkGDBServerCLExe \
+                    -device STM32F407VG \
+                    -if SWD \
+                    -speed ${jlinkSpeedKhz} \
+                    -port "$port" \
+                    > jlink.log 2>&1 &
+                elif [[ "$debugger" == "stlink" ]]; then
+                  port=4242
+                  setsid st-util -p "$port" > stlink.log 2>&1 &
+                fi
 
-              # Kill J-Link server when script exits
-              trap 'kill $JLINK_PID' EXIT
+                DEBUG_SERVER_PID=$!
 
-              # Give the server a moment to start
-              sleep 1
+                # Kill J-Link server when script exits
+                trap 'kill $DEBUG_SERVER_PID' EXIT
 
-              # Start GDB interactively and run commands
-              exec arm-none-eabi-gdb "$exe" \
-                -ex "set confirm off" \
-                -ex "set pagination off" \
-                -ex "layout src" \
-                -ex "focus cmd" \
-                -ex "target remote localhost:2331" \
-                -ex "load" \
-                -ex "break main" \
-                -ex "continue"
-            '';
-          };
+                # Give the server a moment to start
+                sleep 2
+
+                # Start GDB interactively and run commands
+                exec arm-none-eabi-gdb "$exe" \
+                  -ex "set confirm off" \
+                  -ex "set pagination off" \
+                  -ex "layout src" \
+                  -ex "focus cmd" \
+                  -ex "target remote localhost:$port" \
+                  -ex "load" \
+                  -ex "break main" \
+                  -ex "continue"
+              '';
+            };
+
+          debug-jlink = makeDebugger "jlink";
+          debug-stlink = makeDebugger "stlink";
         in
         {
           packages = rec {
-            inherit meson cmake debug-jlink;
+            inherit
+              meson
+              cmake
+              debug-jlink
+              debug-stlink
+              ;
             default = debugger;
 
             debug = mkProject firmware.debug mkFlashJlink;
