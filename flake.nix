@@ -20,21 +20,23 @@
         let
           jlink = inputs.jlink-nix.packages.${system}.default;
 
+          jlinkSpeedKhz = "10000";
+
           shellExports = ''
             string=${(builtins.concatStringsSep "/bin:" firmware.debug.buildInputs) + "/bin"}
             export PATH=''${string}:$PATH
-            buildir=''${1:-build}
+            build_dir=''${1:-build}
           '';
 
           meson = pkgs.writeShellScriptBin "meson" ''
             ${shellExports}
             cat meson_options.txt
-            meson setup --cross-file=./gcc-arm-none-eabi.meson --cross-file=./stm32f4.meson -Dproject_name="${(firmware.debug).pname}" -Dbuildtype="${(firmware.debug).buildtype}" "$buildir"
+            meson setup --cross-file=./gcc-arm-none-eabi.meson --cross-file=./stm32f4.meson -Dproject_name="${(firmware.debug).pname}" -Dbuildtype="${(firmware.debug).buildtype}" "$build_dir"
           '';
 
           cmake = pkgs.writeShellScriptBin "cmake" ''
             ${shellExports}
-            cmake -B$buildir -DPROJECT_NAME="${(firmware.debug).pname}" -DPROJECT_VERSION="${(firmware.debug).version}" -DCMAKE_BUILD_TYPE="${(firmware.debug).buildtype}"
+            cmake -B$build_dir -DPROJECT_NAME="${(firmware.debug).pname}" -DPROJECT_VERSION="${(firmware.debug).version}" -DCMAKE_BUILD_TYPE="${(firmware.debug).buildtype}"
           '';
 
           mkFirmware = buildtype: pkgs.callPackage ./default.nix { inherit buildtype; };
@@ -56,9 +58,10 @@
             pkgs.writeTextFile {
               name = "jlink-script-${fw.buildtype}";
               text = ''
+                ExitOnError 1
                 device ${fw.device}
                 si 1
-                speed 4000
+                speed ${jlinkSpeedKhz}
                 loadfile ${fw}/bin/${fw.binary},0x08000000
                 r
                 g
@@ -85,42 +88,47 @@
               meta.mainProgram = "${(mkFlash fw).name}";
             };
 
-          debug-jlink = pkgs.writeShellScriptBin "debug" ''
-            ${shellExports}
-            exe=${firmware.debug}/bin/${firmware.debug.executable}
-            if [ -z "$exe" ]; then
-                echo "Provide executable path to .elf"
-                exit 1
-            fi
+          debug-jlink = pkgs.writeShellApplication {
+            name = "debug";
+            runtimeInputs = firmware.debug.buildInputs or [ ];
+            text = ''
+              exe=''${1:-${firmware.debug}/bin/${firmware.debug.executable}}
+              if [ -z "$exe" ]; then
+                  echo "Provide executable path to .elf"
+                  exit 1
+              fi
 
-            JLinkGDBServerCLExe \
-              -device STM32F407VG \
-              -if SWD \
-              -speed 4000 \
-              -port 2331 > jlink.log 2>&1 &
+              setsid JLinkGDBServerCLExe \
+                -device STM32F407VG \
+                -if SWD \
+                -speed ${jlinkSpeedKhz} \
+                -port 2331 > jlink.log 2>&1 &
 
-            JLINK_PID=$!
+              JLINK_PID=$!
 
-            # Kill J-Link server when script exits
-            trap 'kill $JLINK_PID' EXIT
+              # Kill J-Link server when script exits
+              trap 'kill $JLINK_PID' EXIT
 
-            # Give the server a moment to start
-            sleep 1
+              # Give the server a moment to start
+              sleep 1
 
-            # Start GDB interactively and run commands
-            arm-none-eabi-gdb $exe \
-              -ex "layout next" \
-              -ex "layout next" \
-              -ex "target remote localhost:2331" \
-              -ex "load" \
-              -ex "break main" \
-              -ex "continue"
-          '';
+              # Start GDB interactively and run commands
+              exec arm-none-eabi-gdb "$exe" \
+                -ex "set confirm off" \
+                -ex "set pagination off" \
+                -ex "layout src" \
+                -ex "focus cmd" \
+                -ex "target remote localhost:2331" \
+                -ex "load" \
+                -ex "break main" \
+                -ex "continue"
+            '';
+          };
         in
         {
           packages = rec {
-            inherit meson cmake;
-            default = debug;
+            inherit meson cmake debug-jlink;
+            default = debugger;
 
             debug = mkProject firmware.debug mkFlashJlink;
             release = mkProject firmware.release mkFlashJlink;
