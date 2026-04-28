@@ -1,5 +1,14 @@
-{ stdenv, cmake, gnumake, gcc-arm-embedded, meson, ninja, bash
-, buildtype ? "debug", lib }:
+{
+  stdenv,
+  cmake,
+  gnumake,
+  gcc-arm-embedded,
+  meson,
+  ninja,
+  bash,
+  buildtype ? "debug",
+  lib,
+}:
 
 assert buildtype == "debug" || buildtype == "release";
 
@@ -11,16 +20,21 @@ stdenv.mkDerivation rec {
   src = ./.;
 
   # order of ninja+meson nad cmake+gnumake will impact which generator is chosen
-  buildInputs = [ gcc-arm-embedded ninja meson cmake gnumake ];
+  buildInputs = [
+    gcc-arm-embedded
+    ninja
+    meson
+    cmake
+    gnumake
+  ];
 
-  dontFixup =
-    true; # if you use fixupPhase (do something after build), remove this
+  dontFixup = true; # if you use fixupPhase (do something after build), remove this
   dontStrip = true;
   dontPatchELF = true;
 
   # Firmware/device info
   device = "STM32F407VG";
-  binary = "${pname}${buildtype}-${version}-.bin";
+  binary = "${pname}-${buildtype}-${version}.bin";
   executable = "${pname}-${buildtype}-${version}.elf";
 
   # cmake
@@ -47,6 +61,6 @@ stdenv.mkDerivation rec {
   installPhase = ''
     mkdir -p $out/bin
     cp *.bin *.elf *.s $out/bin
-    cp compile_commands.json $out
+    cp compile_commands.json $out/bin
   '';
 }
