@@ -1,6 +1,8 @@
 .PHONY: all build build-container cmake format format-linux flash-stlink flash-jlink format-container shell image build-container clean clean-image clean-all
 ############################### Native Makefile ###############################
 
+MAKEFLAGS+=--no-print-directory
+
 BUILD_DIR ?= build
 PROJECT_NAME ?= firmware
 BUILD_TYPE ?= debug
@@ -28,7 +30,7 @@ endif
 all: build
 
 build: cmake
-	@MAKEFLAGS+=--no-print-directory; cmake --build $(BUILD_DIR)
+	@cmake --build $(BUILD_DIR)
 
 cmake: $(BUILD_DIR)/Makefile
 
