@@ -72,7 +72,7 @@ $(JLINK_SCRIPT):
 
 flash-jlink: build | $(JLINK_SCRIPT)
 	@echo "Flashing the board with JLINK"
-	@JLinkExe -commanderScript $(BUILD_DIR)/jlink-script > jlink.log 2> >(tee -a jlink.log >&2) || cat jlink.log
+	@JLinkExe -commanderScript $(BUILD_DIR)/jlink-script -NoGui 1 > jlink.log 2> >(tee -a jlink.log >&2) || cat jlink.log
 	@echo "Flashing complete!"
 
 clean:
