@@ -1,11 +1,16 @@
 .PHONY: all build build-container cmake format format-linux flash-stlink flash-jlink format-container shell image build-container clean clean-image clean-all
 ############################### Native Makefile ###############################
 
-PROJECT_NAME ?= firmware
 BUILD_DIR ?= build
-FIRMWARE := $(BUILD_DIR)/$(PROJECT_NAME).bin
+PROJECT_NAME ?= firmware
 BUILD_TYPE ?= debug
-PLATFORM = $(if $(OS),$(OS),$(shell uname -s))
+VERSION := $(shell cat ./VERSION)
+FIRMWARE := $(BUILD_DIR)/$(PROJECT_NAME)-$(BUILD_TYPE)-$(VERSION).elf
+PLATFORM := $(if $(OS),$(OS),$(shell uname -s))
+FIRMWARE_FLASH_ADDRESS = $(shell arm-none-eabi-readelf -l $(FIRMWARE)) | awk '/LOAD/ { print $3; exit }')
+
+# Device specific!
+DEVICE ?= STM32F407VG
 
 ifeq ($(PLATFORM),Windows_NT)
     BUILD_SYSTEM ?= MinGW Makefiles
@@ -21,7 +26,7 @@ endif
 all: build
 
 build: cmake
-	$(MAKE) -C $(BUILD_DIR) --no-print-directory
+	@MAKEFLAGS+=--no-print-directory; cmake --build $(BUILD_DIR)
 
 cmake: $(BUILD_DIR)/Makefile
 
@@ -49,22 +54,24 @@ format-linux: $(addsuffix .format-linux,$(FORMAT_LINUX))
 %.format-linux: %
 	$(if $(filter $(PLATFORM),Linux),dos2unix -q $<,)
 
-# Device specific!
-DEVICE ?= STM32F407VG
-
 flash-st: build
-	st-flash --reset write $(FIRMWARE) 0x08000000
+	@echo "Flashing the board with ST-LINK"
+	@st-flash --reset write $(FIRMWARE) $(FIRMWARE_FLASH_ADDRESS) > stlink.log 2> >(tee -a stlink.log >&2)
+	@echo "Flashing complete!"
 
-$(BUILD_DIR)/jlink-script:
-	touch $@
+$(BUILD_DIR)/jlink-script: $(FIRMWARE)
+	@touch $@
+	@echo ExitOnError 1 > $@
 	@echo device $(DEVICE) > $@
 	@echo si 1 >> $@
-	@echo speed 4000 >> $@
-	@echo loadfile $(FIRMWARE),0x08000000 >> $@
+	@echo speed 10000 >> $@
+	@echo loadfile $(FIRMWARE) >> $@
 	@echo -e "r\ng\nqc" >> $@
 
 flash-jlink: build | $(BUILD_DIR)/jlink-script
-	JLinkExe -commanderScript $(BUILD_DIR)/jlink-script
+	@echo "Flashing the board with JLINK"
+	@JLinkExe -commanderScript $(BUILD_DIR)/jlink-script > jlink.log 2> >(tee -a jlink.log >&2)
+	@echo "Flashing complete!"
 
 clean:
 	rm -rf $(BUILD_DIR)
