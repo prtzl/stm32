@@ -6,8 +6,10 @@ PROJECT_NAME ?= firmware
 BUILD_TYPE ?= debug
 VERSION := $(shell cat ./VERSION)
 FIRMWARE := $(BUILD_DIR)/$(PROJECT_NAME)-$(BUILD_TYPE)-$(VERSION).elf
+FIRMWARE_BIN := $(BUILD_DIR)/$(PROJECT_NAME)-$(BUILD_TYPE)-$(VERSION).bin
 PLATFORM := $(if $(OS),$(OS),$(shell uname -s))
-FIRMWARE_FLASH_ADDRESS = $(shell arm-none-eabi-readelf -l $(FIRMWARE)) | awk '/LOAD/ { print $3; exit }')
+FIRMWARE_FLASH_ADDRESS = $(shell arm-none-eabi-readelf -l $(FIRMWARE) | awk '/LOAD/ { print $$3; exit }')
+JLINK_SCRIPT := $(BUILD_DIR)/jlink-script
 
 # Device specific!
 DEVICE ?= STM32F407VG
@@ -31,7 +33,7 @@ build: cmake
 cmake: $(BUILD_DIR)/Makefile
 
 $(BUILD_DIR)/Makefile: CMakeLists.txt
-	cmake \
+	@cmake \
 		-G "$(BUILD_SYSTEM)" \
 		-B$(BUILD_DIR) \
 		-DPROJECT_NAME=$(PROJECT_NAME) \
@@ -56,25 +58,25 @@ format-linux: $(addsuffix .format-linux,$(FORMAT_LINUX))
 
 flash-st: build
 	@echo "Flashing the board with ST-LINK"
-	@st-flash --reset write $(FIRMWARE) $(FIRMWARE_FLASH_ADDRESS) > stlink.log 2> >(tee -a stlink.log >&2)
+	@st-flash --reset write $(FIRMWARE_BIN) $(FIRMWARE_FLASH_ADDRESS) > stlink.log 2>&1 || cat stlink.log
 	@echo "Flashing complete!"
 
-$(BUILD_DIR)/jlink-script: $(FIRMWARE)
+$(JLINK_SCRIPT):
 	@touch $@
 	@echo ExitOnError 1 > $@
-	@echo device $(DEVICE) > $@
+	@echo device $(DEVICE) >> $@
 	@echo si 1 >> $@
 	@echo speed 10000 >> $@
 	@echo loadfile $(FIRMWARE) >> $@
 	@echo -e "r\ng\nqc" >> $@
 
-flash-jlink: build | $(BUILD_DIR)/jlink-script
+flash-jlink: build | $(JLINK_SCRIPT)
 	@echo "Flashing the board with JLINK"
-	@JLinkExe -commanderScript $(BUILD_DIR)/jlink-script > jlink.log 2> >(tee -a jlink.log >&2)
+	@JLinkExe -commanderScript $(BUILD_DIR)/jlink-script > jlink.log 2> >(tee -a jlink.log >&2) || cat jlink.log
 	@echo "Flashing complete!"
 
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR) jlink.log stlink.log
 
 ################################## Container ##################################
 
