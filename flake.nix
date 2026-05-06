@@ -19,11 +19,8 @@
         { pkgs, system, ... }:
         let
           jlink = inputs.jlink-nix.packages.${system}.default;
-          jlinkSpeedKhz = "10000";
 
-          tools = import ./nix {
-            inherit pkgs jlink jlinkSpeedKhz;
-          };
+          tools = import ./nix { inherit pkgs jlink; };
 
           inherit (tools)
             firmware
@@ -34,17 +31,12 @@
             ;
         in
         {
-          packages = rec {
+          packages = {
             inherit (debug) debug-jlink debug-stlink;
             inherit (buildTools) meson cmake;
 
-            debugjl = mkProject firmware.debug flash.mkFlashJlink;
-            releasejl = mkProject firmware.release flash.mkFlashJlink;
-
-            debugst = mkProject firmware.debug flash.mkFlashStlink;
-            releasest = mkProject firmware.release flash.mkFlashStlink;
-
-            default = debugjl;
+            flash-stlink = flash.flashStlink;
+            flash-jlink = flash.flashJlink;
           };
 
           devShells.default = pkgs.mkShellNoCC {

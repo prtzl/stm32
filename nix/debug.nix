@@ -37,6 +37,7 @@ let
             -device STM32F407VG \
             -if SWD \
             -speed ${jlinkSpeedKhz} \
+            -s \
             -port "$port" \
             > jlink.log 2>&1 &
         elif [[ "$debugger" == "stlink" ]]; then

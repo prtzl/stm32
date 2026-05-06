@@ -6,42 +6,62 @@
 }:
 
 let
-  mkFlashStlink =
-    fw:
-    pkgs.writeShellApplication {
-      name = "flash-stlink-${fw.buildtype}";
-      text = ''
-        st-flash --reset write ${fw}/bin/${fw.binary} 0x08000000
-      '';
-      runtimeInputs = [ pkgs.stlink ];
-    };
+  flashStlink = pkgs.writeShellApplication {
+    name = "flash-stlink";
+    runtimeInputs = [ pkgs.stlink ];
+    text = ''
+      set -euo pipefail
 
-  jlinkScript =
-    fw:
-    pkgs.writeTextFile {
-      name = "jlink-script-${fw.buildtype}";
-      text = ''
-        ExitOnError 1
-        device ${fw.device}
-        si 1
-        speed ${jlinkSpeedKhz}
-        loadfile ${fw}/bin/${fw.binary},0x08000000
-        r
-        g
-        qc
-      '';
-    };
+      elf="''${1:-}"
+      if [ -z "$elf" ]; then
+        echo "Usage: flash-stlink <firmware.elf>"
+        exit 1
+      fi
 
-  mkFlashJlink =
-    fw:
-    pkgs.writeShellApplication {
-      name = "flash-jlink-${fw.buildtype}";
-      text = ''
-        JLinkExe -commanderscript ${jlinkScript fw}
-      '';
-      runtimeInputs = [ jlink ];
-    };
+      if [ ! -f "$elf" ]; then
+        echo "File not found: $elf"
+        exit 1
+      fi
+
+      st-flash --reset write "$elf" 0x08000000
+    '';
+  };
+
+  flashJlink = pkgs.writeShellApplication {
+    name = "flash-jlink";
+    runtimeInputs = [ jlink ];
+    text = ''
+      elf="''${1:-}"
+      if [ -z "$elf" ]; then
+        echo "Usage: flash-jlink <firmware.elf>"
+        exit 1
+      fi
+
+      if [ ! -f "$elf" ]; then
+        echo "File not found: $elf"
+        exit 1
+      fi
+
+      tmp=$(mktemp)
+      cat > "$tmp" <<EOF
+      ExitOnError 1
+      device STM32F407VG
+      si SWD
+      speed ${jlinkSpeedKhz}
+      loadfile $elf
+      r
+      g
+      qc
+      EOF
+
+      JLinkExe -commanderscript "$tmp"
+      rm -f "$tmp"
+    '';
+  };
 in
 {
-  inherit mkFlashStlink mkFlashJlink;
+  inherit
+    flashStlink
+    flashJlink
+    ;
 }

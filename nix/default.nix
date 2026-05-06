@@ -1,11 +1,12 @@
 {
   jlink,
-  jlinkSpeedKhz,
   pkgs,
   ...
 }:
 
 let
+  jlinkSpeedKhz = "10000";
+
   mkFirmware = buildtype: pkgs.callPackage ./firmware.nix { inherit buildtype; };
   firmware = {
     debug = mkFirmware "debug";
