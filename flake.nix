@@ -27,17 +27,31 @@
             flash
             debug
             buildTools
-            mkProject
             ;
         in
         {
-          packages = {
-            inherit (debug) debug-jlink debug-stlink;
-            inherit (buildTools) meson cmake;
+          packages =
+            let
+              defaultFlash = pkgs.writeShellScriptBin "flash-default" ''
+                exec ${flash.flash-jlink}/bin/flash-jlink ${firmware.debug}/bin/${firmware.debug.executable}
+              '';
 
-            flash-stlink = flash.flashStlink;
-            flash-jlink = flash.flashJlink;
-          };
+              default = pkgs.symlinkJoin {
+                name = "flash-debug";
+                paths = [
+                  firmware.debug
+                  defaultFlash
+                ];
+                meta.mainProgram = defaultFlash.name;
+              };
+            in
+            {
+              inherit (debug) debug-jlink debug-stlink;
+              inherit (flash) flash-jlink flash-stlink;
+              inherit (buildTools) meson cmake;
+
+              inherit default;
+            };
 
           devShells.default = pkgs.mkShellNoCC {
             nativeBuildInputs =

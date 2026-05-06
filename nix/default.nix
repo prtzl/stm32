@@ -24,17 +24,6 @@ let
   buildTools = import ./build-tools.nix {
     inherit pkgs firmware;
   };
-
-  mkProject =
-    fw: mkFlash:
-    pkgs.symlinkJoin {
-      name = "project-output";
-      paths = [
-        fw
-        (mkFlash fw)
-      ];
-      meta.mainProgram = (mkFlash fw).name;
-    };
 in
 {
   inherit
@@ -42,6 +31,5 @@ in
     flash
     debug
     buildTools
-    mkProject
     ;
 }

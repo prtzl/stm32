@@ -6,7 +6,7 @@
 }:
 
 let
-  flashStlink = pkgs.writeShellApplication {
+  flash-stlink = pkgs.writeShellApplication {
     name = "flash-stlink";
     runtimeInputs = [ pkgs.stlink ];
     text = ''
@@ -27,7 +27,7 @@ let
     '';
   };
 
-  flashJlink = pkgs.writeShellApplication {
+  flash-jlink = pkgs.writeShellApplication {
     name = "flash-jlink";
     runtimeInputs = [ jlink ];
     text = ''
@@ -54,14 +54,14 @@ let
       qc
       EOF
 
-      JLinkExe -commanderscript "$tmp"
+      JLinkExe -commanderscript "$tmp" -NoGui 1
       rm -f "$tmp"
     '';
   };
 in
 {
   inherit
-    flashStlink
-    flashJlink
+    flash-jlink
+    flash-stlink
     ;
 }
