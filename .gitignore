@@ -9,8 +9,8 @@
 !/docs
 
 # NIX
-!*.nix
-!flake.lock
+!nix/
+!flake.*
 
 # TOOLS
 !Makefile

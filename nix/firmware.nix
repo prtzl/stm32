@@ -16,7 +16,7 @@ stdenv.mkDerivation rec {
   inherit buildtype;
 
   pname = "firmware";
-  version = lib.fileContents ./VERSION;
+  version = lib.fileContents ../VERSION;
   src = ./.;
 
   # order of ninja+meson nad cmake+gnumake will impact which generator is chosen
