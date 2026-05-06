@@ -67,7 +67,7 @@ $(JLINK_SCRIPT):
 	@touch $@
 	@echo ExitOnError 1 > $@
 	@echo device $(DEVICE) >> $@
-	@echo si 1 >> $@
+	@echo si SWD >> $@
 	@echo speed 10000 >> $@
 	@echo loadfile $(FIRMWARE) >> $@
 	@echo -e "r\ng\nqc" >> $@
