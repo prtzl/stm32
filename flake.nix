@@ -16,11 +16,16 @@
       systems = [ "x86_64-linux" ];
 
       perSystem =
-        { pkgs, system, ... }:
+        {
+          lib,
+          pkgs,
+          system,
+          ...
+        }:
         let
           jlink = inputs.jlink-nix.packages.${system}.default;
 
-          tools = import ./nix { inherit pkgs jlink; };
+          tools = import ./nix { inherit pkgs jlink lib; };
 
           inherit (tools)
             firmware

@@ -1,5 +1,6 @@
 {
   jlink,
+  lib,
   pkgs,
   ...
 }:
@@ -14,7 +15,12 @@ let
   };
 
   flash = import ./flash.nix {
-    inherit pkgs jlink jlinkSpeedKhz;
+    inherit
+      jlink
+      jlinkSpeedKhz
+      lib
+      pkgs
+      ;
   };
 
   debug = import ./debug.nix {

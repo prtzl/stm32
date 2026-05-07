@@ -1,67 +1,59 @@
 {
   jlink,
   jlinkSpeedKhz,
+  lib,
   pkgs,
   ...
 }:
 
 let
-  flash-stlink = pkgs.writeShellApplication {
-    name = "flash-stlink";
-    runtimeInputs = [ pkgs.stlink ];
-    text = ''
-      set -euo pipefail
+  jlinkScriptTeplate = pkgs.writeText "jscript" ''
+    ExitOnError 1
+    device STM32F407VG
+    si SWD
+    speed ${jlinkSpeedKhz}
+    loadfile %ELF%
+    r
+    g
+    qc
+  '';
 
-      elf="''${1:-}"
-      if [ -z "$elf" ]; then
-        echo "Usage: flash-stlink <firmware.elf>"
-        exit 1
-      fi
+  mkFlasher =
+    variant:
+    assert variant == "jlink" || variant == "stlink";
+    pkgs.writeShellApplication {
+      name = "flash-${variant}";
+      runtimeInputs =
+        lib.optional (variant == "jlink") jlink ++ lib.optional (variant == "stlink") pkgs.stlink;
+      text = ''
+        elf="''${1:-}"
+        if [ -z "$elf" ]; then
+          echo "Usage: flash-stlink <firmware.elf>"
+          exit 1
+        fi
 
-      if [ ! -f "$elf" ]; then
-        echo "File not found: $elf"
-        exit 1
-      fi
+        if [ ! -f "$elf" ]; then
+          echo "File not found: $elf"
+          exit 1
+        fi
 
-      st-flash --reset write "$elf" 0x08000000
-    '';
-  };
+        flasher="${variant}"
+        if [[ "$flasher" == "jlink" ]]; then
+          tmp=$(mktemp)
+          cleanup() { rm -f "$tmp"; }
+          trap cleanup EXIT
 
-  flash-jlink = pkgs.writeShellApplication {
-    name = "flash-jlink";
-    runtimeInputs = [ jlink ];
-    text = ''
-      elf="''${1:-}"
-      if [ -z "$elf" ]; then
-        echo "Usage: flash-jlink <firmware.elf>"
-        exit 1
-      fi
+          cp "${jlinkScriptTeplate}" "$tmp"
+          sed -i "s@%ELF%@''${elf}@" "$tmp"
 
-      if [ ! -f "$elf" ]; then
-        echo "File not found: $elf"
-        exit 1
-      fi
-
-      tmp=$(mktemp)
-      cat > "$tmp" <<EOF
-      ExitOnError 1
-      device STM32F407VG
-      si SWD
-      speed ${jlinkSpeedKhz}
-      loadfile $elf
-      r
-      g
-      qc
-      EOF
-
-      JLinkExe -commanderscript "$tmp" -NoGui 1
-      rm -f "$tmp"
-    '';
-  };
+          exec JLinkExe -commanderscript "$tmp" -NoGui 1
+        elif [[ "$flasher" == "stlink" ]]; then
+          exec st-flash --reset write "$elf" 0x08000000
+        fi
+      '';
+    };
 in
 {
-  inherit
-    flash-jlink
-    flash-stlink
-    ;
+  flash-jlink = mkFlasher "jlink";
+  flash-stlink = mkFlasher "stlink";
 }
