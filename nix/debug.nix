@@ -1,6 +1,7 @@
 {
   jlink,
   jlinkSpeedKhz,
+  lib,
   pkgs,
   ...
 }:
@@ -14,14 +15,14 @@ let
 
       runtimeInputs = [
         pkgs.gcc-arm-embedded
-        pkgs.stlink
-        jlink
-      ];
+      ]
+      ++ lib.optional (variant == "jlink") jlink
+      ++ lib.optional (variant == "stlink") pkgs.stlink;
 
       text = ''
         exe=''${1:-}
         if [ -z "$exe" ]; then
-            echo "Usage: $0 <path-to-elf>"
+            echo "Usage: $(basename "$0") <path-to-elf>"
             exit 1
         fi
 

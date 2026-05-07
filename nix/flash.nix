@@ -28,7 +28,7 @@ let
       text = ''
         elf="''${1:-}"
         if [ -z "$elf" ]; then
-          echo "Usage: flash-stlink <firmware.elf>"
+          echo "Usage: $(basename "$0") <firmware.elf>"
           exit 1
         fi
 

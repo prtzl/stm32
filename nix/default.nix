@@ -24,7 +24,12 @@ let
   };
 
   debug = import ./debug.nix {
-    inherit pkgs jlink jlinkSpeedKhz;
+    inherit
+      jlink
+      jlinkSpeedKhz
+      lib
+      pkgs
+      ;
   };
 
   buildTools = import ./build-tools.nix {
