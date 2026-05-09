@@ -35,6 +35,11 @@
             ;
         in
         {
+          _module.args.pkgs = import nixpkgs {
+            inherit system;
+            config.allowUnfree = true;
+          };
+
           packages =
             let
               defaultFlash = pkgs.writeShellScriptBin "flash-default" ''
@@ -68,6 +73,7 @@
                 dos2unix
                 glibc_multi
                 stlink
+                stm32cubemx
               ]);
           };
         };
