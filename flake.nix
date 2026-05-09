@@ -66,14 +66,16 @@
           devShells.default = pkgs.mkShellNoCC {
             nativeBuildInputs =
               (firmware.debug.buildInputs or [ ])
-              ++ [ jlink ]
+              ++ [
+                jlink
+                buildTools.cubemx
+              ]
               ++ (with pkgs; [
                 clang
                 clang-tools
                 dos2unix
                 glibc_multi
                 stlink
-                stm32cubemx
               ]);
           };
         };

@@ -22,4 +22,12 @@ in
     ${shellExports}
     cmake -B$build_dir -DPROJECT_NAME="${(firmware.debug).pname}" -DPROJECT_VERSION="${(firmware.debug).version}" -DCMAKE_BUILD_TYPE="${(firmware.debug).buildtype}"
   '';
+
+  cubemx = pkgs.writeShellApplication {
+    name = "cubemx";
+    runtimeInputs = [ pkgs.stm32cubemx ];
+    text = ''
+      stm32cubemx > .stm32cubemx.log 2> >(tee -a .stm32cubemx.err >&2) &
+    '';
+  };
 }
