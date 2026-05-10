@@ -3,7 +3,7 @@ set(CMAKE_SYSTEM_PROCESSOR arm)
 
 set(TOOLCHAIN_PREFIX arm-none-eabi-)
 set(CMAKE_C_FLAGS_INIT
-    "-fdata-sections -ffunction-sections --specs=nano.specs -Wl,--gc-sections")
+    "-fdata-sections -ffunction-sections -Wl,--gc-sections")
 set(CMAKE_CXX_FLAGS_INIT
     "${CMAKE_C_FLAGS_INIT} -fno-rtti -fno-exceptions -fno-threadsafe-statics")
 

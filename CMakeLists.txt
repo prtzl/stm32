@@ -106,6 +106,8 @@ target_link_options(${EXECUTABLE} PRIVATE
     ${CPU_PARAMETERS}
     -Wl,-Map=${CMAKE_PROJECT_NAME}.map
     $<$<VERSION_GREATER:$<C_COMPILER_VERSION>,10.3.1>:-Wl,--no-warn-rwx-segments>
+    --specs=nano.specs
+    --specs=nosys.specs  
     -Wl,--start-group
     -lc
     -lm
