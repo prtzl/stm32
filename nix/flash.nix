@@ -20,35 +20,65 @@ let
 
   mkFlasher =
     variant:
-    assert variant == "jlink" || variant == "stlink";
+    let
+      isJlink = variant == "jlink";
+      isStlink = variant == "stlink";
+
+      expectedExt =
+        if isJlink then
+          "elf"
+        else if isStlink then
+          "bin"
+        else
+          throw "Unsupported flasher variant: ${variant}";
+    in
     pkgs.writeShellApplication {
       name = "flash-${variant}";
-      runtimeInputs =
-        lib.optional (variant == "jlink") jlink ++ lib.optional (variant == "stlink") pkgs.stlink;
+
+      runtimeInputs = lib.optionals isJlink [ jlink ] ++ lib.optionals isStlink [ pkgs.stlink ];
+
       text = ''
-        elf="''${1:-}"
-        if [ -z "$elf" ]; then
-          echo "Usage: $(basename "$0") <firmware.elf>"
-          exit 1
-        fi
-
-        if [ ! -f "$elf" ]; then
-          echo "File not found: $elf"
-          exit 1
-        fi
-
+        executable="''${1:-}"
         flasher="${variant}"
+
+        usage() {
+          echo "Usage: $(basename "$0") <firmware.${expectedExt}>"
+          exit 1
+        }
+
+        if [ -z "$executable" ]; then
+          usage
+        fi
+
+        if [ ! -f "$executable" ]; then
+          echo "File not found: $executable"
+          exit 1
+        fi
+
+        ext="''${executable##*.}"
+
+        if [ "$ext" != "${expectedExt}" ]; then
+          echo "Invalid firmware type for ${variant}:"
+          echo "  expected: .${expectedExt}"
+          echo "  got:      .$ext"
+          exit 1
+        fi
+
         if [[ "$flasher" == "jlink" ]]; then
           tmp=$(mktemp)
-          cleanup() { rm -f "$tmp"; }
+
+          cleanup() {
+            rm -f "$tmp"
+          }
+
           trap cleanup EXIT
 
           cp "${jlinkScriptTeplate}" "$tmp"
-          sed -i "s@%ELF%@''${elf}@" "$tmp"
+          sed -i "s@%ELF%@$executable@" "$tmp"
 
           exec JLinkExe -commanderscript "$tmp" -NoGui 1
-        elif [[ "$flasher" == "stlink" ]]; then
-          exec st-flash --reset write "$elf" 0x08000000
+        else
+          exec st-flash --reset write "$executable" 0x08000000
         fi
       '';
     };
