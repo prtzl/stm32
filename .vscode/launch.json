@@ -4,12 +4,13 @@
     "projectName": "test-f407vg",
     "configurations": [
         {
-            "name": "JLink debug",
-            "cwd": "${workspaceRoot}",
-            "executable": "${workspaceRoot}/build/sample-f407vg.elf",
+            "name": "JLink launch",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/build/firmware-debug-1.0.elf",
             "request": "launch",
             "type": "cortex-debug",
             "servertype": "jlink",
+            "serverpath": "JLinkGDBServerCLExe",
             "device": "STM32F407VG",
             "interface": "swd",
             "runToEntryPoint": "main",
@@ -33,11 +34,12 @@
         },
         {
             "name": "JLink attach",
-            "cwd": "${workspaceRoot}",
-            "executable": "${workspaceRoot}/build/sample-f407vg.elf",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/build/firmware-debug-1.0.elf",
             "request": "attach",
             "type": "cortex-debug",
             "servertype": "jlink",
+            "serverpath": "JLinkGDBServerCLExe",
             "device": "STM32F407VG",
             "interface": "swd",
             "swoConfig":
