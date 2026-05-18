@@ -17,9 +17,7 @@ gdb     = arch + '-gdb'
 c_args = [
     '-mthumb',
     '-ffunction-sections',
-    '-fdata-sections',
-    '--specs=nano.specs',
-    '-Wl,--gc-sections']
+    '-fdata-sections']
 
 cpp_args = c_args + [
     '-fno-rtti',
@@ -29,6 +27,9 @@ cpp_args = c_args + [
 c_link_args = c_args + [
     '-lc',
     '-lm',
-    '-lstdc++']
+    '-lstdc++',
+    '--specs=nano.specs',
+    '--specs=nosys.specs',
+    '-Wl,--gc-sections']
 
 cpp_link_args = c_link_args
