@@ -115,11 +115,6 @@ target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
   -Wl,-Map=${CMAKE_PROJECT_NAME}.map
   $<$<VERSION_GREATER:$<C_COMPILER_VERSION>,10.3.1>:-Wl,--no-warn-rwx-segments>
   -u _printf_float
-  -Wl,--start-group
-  -lc
-  -lm
-  -lstdc++
-  -Wl,--end-group
   -Wl,--print-memory-usage
 )
 
