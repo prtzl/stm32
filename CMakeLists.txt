@@ -106,7 +106,7 @@ target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE
   -Wsuggest-override>
   $<$<CONFIG:debug>:-Og -g3 -ggdb>
   $<$<CONFIG:release>:-Og -g0>
-  -Wno-psabi
+  -Wno-psabi # some ABI change notes regarding fmt ... 
 )
 
 target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
@@ -114,7 +114,6 @@ target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
   ${CPU_PARAMETERS}
   -Wl,-Map=${CMAKE_PROJECT_NAME}.map
   $<$<VERSION_GREATER:$<C_COMPILER_VERSION>,10.3.1>:-Wl,--no-warn-rwx-segments>
-  -u _printf_float
   -Wl,--print-memory-usage
 )
 
