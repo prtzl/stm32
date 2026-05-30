@@ -48,6 +48,43 @@ extern "C"
         return 1;
     }
 
+    void _exit(int status)
+    {
+        (void)status;
+
+        // Option 1: trap (preferred for debugging)
+        __builtin_trap();
+
+        // Option 2: infinite loop fallback
+        while (1)
+        {
+        }
+    }
+
+    // INFO: vibe coded this part mostly. Works, but probably not good. Should use someone
+    // smarter
+    extern char _end;    // end of .bss / .data
+    extern char _estack; // provided by linker script (or a fixed RAM top)
+
+    void* _sbrk(ptrdiff_t incr)
+    {
+        extern char _end;
+        extern char _estack;
+
+        static char* heap_end = &_end;
+
+        char* prev_heap_end = heap_end;
+
+        // simple RAM limit check
+        if (heap_end + incr > &_estack)
+        {
+            return (void*)-1; // out of memory
+        }
+
+        heap_end += incr;
+        return (void*)prev_heap_end;
+    }
+
     // project-specific stub for writing (printf mainly)
     ssize_t _write(int fd, const void* buffer, size_t count)
     {

@@ -1,12 +1,15 @@
-#include "main.h"
 #include <Project/SWO.h>
 #include <Project/projectMain.h>
 
 #include <array>
 #include <cstdint>
-#include <cstdio>
 #include <limits>
+#include <print>
 #include <span>
+
+#include <stm32f407xx.h>
+#include <stm32f4xx_hal.h>
+#include <stm32f4xx_hal_gpio.h>
 
 struct Led
 {
@@ -54,12 +57,8 @@ void projectMain()
 
         static float myFloat = 0.55f;
 
-        printf(
-            "%.*d Hello, world! %f\n",
-            maxIndexDigits,
-            index++,
-            static_cast<double>(myFloat += 0.237f));
-        // SWO_PrintDefault("Hello, world!\n");
+        std::print(
+            "{:0{}} Hello, world! {:.6f}\n", index++, maxIndexDigits, myFloat += 0.237f);
 
         HAL_Delay(1000);
     }

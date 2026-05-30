@@ -4,7 +4,7 @@ set(CMAKE_SYSTEM_PROCESSOR arm)
 set(TOOLCHAIN_PREFIX arm-none-eabi-)
 set(CMAKE_C_FLAGS_INIT "-fdata-sections -ffunction-sections ")
 set(CMAKE_CXX_FLAGS_INIT "${CMAKE_C_FLAGS_INIT} -fno-rtti -fno-exceptions -fno-threadsafe-statics")
-set(CMAKE_EXE_LINKER_FLAGS_INIT "--specs=nano.specs --specs=nosys.specs -Wl,--gc-sections")
+set(CMAKE_EXE_LINKER_FLAGS_INIT "--specs=nano.specs -Wl,--gc-sections")
 
 set(CMAKE_C_COMPILER ${TOOLCHAIN_PREFIX}gcc)
 set(CMAKE_ASM_COMPILER ${CMAKE_C_COMPILER})
