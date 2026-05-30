@@ -25,11 +25,12 @@ Install the following packages:
 
 * git
 * gnumake
+* Ninja (optional, but my preferred for larger projects)
 * cmake
 * gcc-arm-embedded (+ newlib and binutils if not included in the package)
 * clang-tools (optional)
 
-I would recommend gcc-10.3.y for latest C++20 features. Versions 9.x.y will still do C++20 but with a limited feature set. If you have newer, then go for it.  
+I would recommend gcc-15.2.y for latest C++26 features.  
 
 You can download arm-none-eabi toolchain from [website](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads). It is universal for most distros. If your distribution carries it, install it with that, but mind the version and compatibility.  
 
@@ -52,7 +53,7 @@ If you want to use `CMake` only, let's say for an IDE, then all you need to do i
 * Generate cmake project (minimum):
 
     ```shell
-    cmake -G "Unix Makefiles" -B build -DPROJECT_NAME=firmware -DCMAKE_TOOLCHAIN_FILE=gcc-arm-none-eabi.cmake -DCMAKE_BUILD_TYPE=Debug
+    cmake -G "<Ninja/Unix Makefiles>" -B build -DPROJECT_NAME=firmware -DCMAKE_BUILD_TYPE=Debug
     ```
 
 * Compile project:

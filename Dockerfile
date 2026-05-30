@@ -6,6 +6,7 @@ RUN dnf update -y && dnf install -y \
     lbzip2 \
     make \
     cmake \
+    ninja \
     glibc-locale-source \
     findutils \
     clang-tools-extra \

@@ -103,4 +103,9 @@ winpty docker run --rm -it -v "/$(pwd -W):/workdir" -w//workdir fedora-arm-embed
 
 If you're using `podman`, then you also have to provide a few more arguments to  **run** commands: `--userns=keep-id --security-opt label=disable`.  
 
-Tested with docker (`20.10.9`), podman (`3.4.3`), docker-compose (`1.29.2`) on Fedora 35.  
+Tested on NixOS `26.05/unstable` with:
+* ninja: `1.13.2`
+* cmake: `4.1.2`
+* gnumake: `4.4.1`
+* podman: `5.8.2`
+* arm-gcc-toolchain: `Arm GNU Toolchain 15.2.Rel1 (Build arm-15.86) 2.45.1.20251203`

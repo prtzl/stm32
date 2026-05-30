@@ -16,15 +16,16 @@ JLINK_SCRIPT := $(BUILD_DIR)/jlink-script
 # Device specific!
 DEVICE ?= STM32F407VG
 
-ifeq ($(PLATFORM),Windows_NT)
-    BUILD_SYSTEM ?= MinGW Makefiles
+ifeq ($(OS),Windows_NT)
+	BUILD_SYSTEM ?= MinGW Makefiles
 else
-    ifeq ($(PLATFORM),Linux)
-        BUILD_SYSTEM ?= Unix Makefiles
-    else
-        @echo "Unsuported platform"
-        exit 1
-    endif
+	NINJA := $(shell command -v ninja 2>/dev/null)
+
+	ifneq ($(strip $(NINJA)),)
+		BUILD_SYSTEM ?= Ninja
+	else
+		BUILD_SYSTEM ?= Unix Makefiles
+	endif
 endif
 
 all: build
